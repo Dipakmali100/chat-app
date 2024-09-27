@@ -1,7 +1,23 @@
-import './App.css'
+import { useEffect } from "react";
+import { io } from "socket.io-client";
 
 function App() {
+  const userId=1;
+  const socket = io("http://localhost:5000",{
+    query:{
+      userId: userId
+    }
+  });
 
+  useEffect(()=>{
+    socket.on("connect",()=>{
+      console.log("Connected to server, ID: " + socket.id);
+    });
+
+    socket.on("welcome",(data)=>{
+      console.log(data);
+    })
+  },[]);
   return (
     <>
       <div className='flex justify-center'>
@@ -13,4 +29,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
