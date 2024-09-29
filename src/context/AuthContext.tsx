@@ -19,9 +19,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const[count, setCount] = useState(0);
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
 
     useEffect(() => {
+        console.log(`useEffect called with count: ${count}`);
+        setCount(count + 1);
         const checkJwtToken = async () => {
             const token = localStorage.getItem('token');
 
@@ -31,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
             try {
-                const response = await axios.get(`${API_URL}/api/v1/auth/verify`, {
+                const response = await axios.post(`${API_URL}/api/v1/auth/verify`, null, {
                     headers: {
                         Authorization: token
                     }
@@ -39,9 +42,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                 if (response.status === 200) {
                     setIsAuthenticated(true);
+                    alert("Token verified successfully");
                 } else {
-                    setIsAuthenticated(false);
                     logout();
+                    alert("Token verification failed");
                 }
             } catch (err) {
                 console.error("Error while verifying token: ", err);

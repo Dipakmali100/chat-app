@@ -14,25 +14,25 @@ export const router = createBrowserRouter([
     {
         path: "/register",
         element: (
-            // <OpenRoutes>
+            <OpenRoutes>
                 <Register />
-            // </OpenRoutes>
+            </OpenRoutes>
         )
     },
     {
         path: "/login",
         element: (
-            // <OpenRoutes>
+            <OpenRoutes>
                 <Login />
-            // </OpenRoutes>
+            </OpenRoutes>
         )
     },
     {
         path: "/chat",
         element: (
-            // <PrivateRoute>
+            <PrivateRoute>
                 <ChattingPage />
-            // </PrivateRoute>
+            </PrivateRoute>
         )
     }
 ]);
