@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"
+import SearchUser from "../components/SearchUser";
+import GetFriendList from "../components/GetFriendList";
+import GetChat from "../components/GetChat";
 
 function ChattingPage() {
   const authContext = useAuth();
@@ -12,7 +15,9 @@ function ChattingPage() {
   return (
     <>
       <div>
-        Chatting Page
+        <SearchUser/>
+        <GetFriendList/>
+        <GetChat/>
       </div>
       <button onClick={handleOnClick}>Logout</button>
     </>

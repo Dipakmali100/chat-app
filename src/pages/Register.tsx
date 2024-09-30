@@ -19,7 +19,7 @@ function Register(): JSX.Element {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
@@ -33,11 +33,11 @@ function Register(): JSX.Element {
     if (response.success === true) {
       const response: any = await loginApi(username, password);
 
-      if(response.success === true) {
+      if (response.success === true) {
         login({ userId: response.data.userId, username: username, token: response.data.token });
         navigate("/chat");
         alert(response.message);
-      }else{
+      } else {
         alert(response.message);
       }
     } else {
@@ -48,19 +48,20 @@ function Register(): JSX.Element {
     <div>
       <form onSubmit={handleSubmit}>
         <label htmlFor="username">Username</label>
-        <input type="text" placeholder="Enter Username" onChange={(e) => {
-          setUsername(e.target.value)
-        }} />
+        <input type="text" placeholder="Enter Username" value={username} onChange={(e) => { setUsername(e.target.value.toLowerCase()) }} /><br />
         <label htmlFor="password">Password</label>
         <input type="password" placeholder="Enter Password" onChange={(e) => {
           setPassword(e.target.value)
-        }} />
+        }} /><br />
         <label htmlFor="confirmPassword">Confirm Password</label>
         <input type="password" placeholder="Enter Confirm Password" onChange={(e) => {
           setConfirmPassword(e.target.value)
-        }} />
+        }} /><br />
         <button type="submit">Register</button>
       </form>
+
+      <br />
+      <button onClick={() => navigate("/login")}>Login Now</button>
     </div>
   )
 }

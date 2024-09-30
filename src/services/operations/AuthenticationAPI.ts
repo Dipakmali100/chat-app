@@ -14,7 +14,7 @@ export const registerApi = async (username: string, password: string) => {
         return response.data;
     }catch(err){
         console.error(err);
-        return {success: false, message: "Something went wrong"}
+        return {success: false, message: "Something went wrong"};
     }
 }
 export const loginApi = async (username: string, password: string) => {
@@ -27,6 +27,6 @@ export const loginApi = async (username: string, password: string) => {
         return response.data;
     }catch(err){
         console.error(err);
-        return {success: false, message: "Something went wrong"}
+        return {success: false, message: "Something went wrong"};
     }
 }

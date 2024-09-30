@@ -42,7 +42,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                 if (response.status === 200) {
                     setIsAuthenticated(true);
-                    alert("Token verified successfully");
+                    setUser({
+                        userId: response.data.data.userId,
+                        username: response.data.data.username,
+                        token
+                    });
+                    console.log("Response: ", response.data);
                 } else {
                     logout();
                     alert("Token verification failed");

@@ -7,7 +7,7 @@ function Login(): JSX.Element {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const authContext = useAuth();
-  const navigate =useNavigate();
+  const navigate = useNavigate();
 
   if (!authContext) {
     throw new Error("useAuth must be used within an AuthProvider");
@@ -33,15 +33,16 @@ function Login(): JSX.Element {
     <div>
       <form onSubmit={handleSubmit}>
         <label htmlFor="username">Username</label>
-        <input type="text" placeholder="Enter Username" onChange={(e) => {
-          setUsername(e.target.value)
-        }} />
+        <input type="text" placeholder="Enter Username" value={username} onChange={(e) => { setUsername(e.target.value.toLowerCase()) }} /><br />
         <label htmlFor="password">Password</label>
         <input type="password" placeholder="Enter Password" onChange={(e) => {
           setPassword(e.target.value)
-        }} />
+        }} /><br />
         <button type="submit">Login</button>
       </form>
+
+      <br />
+      <button onClick={() => navigate("/register")}>Register Here</button>
     </div>
   )
 }
