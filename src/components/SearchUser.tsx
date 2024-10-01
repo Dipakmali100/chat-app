@@ -20,7 +20,7 @@ function SearchUser() {
     }
     return (
         <div className='border-2 border-black'>
-            <h1 className='font-bold'>Search Component</h1>
+            <h1 className='font-bold'>Search Users</h1>
             <form onSubmit={handleSubmit}>
                 <input className="border-2 border-black" type="text" placeholder='Search user here' value={username} onChange={(e) => { setUsername(e.target.value.toLowerCase()) }} />
                 <button type="submit">Search</button>

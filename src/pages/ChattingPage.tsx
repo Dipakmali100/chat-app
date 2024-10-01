@@ -19,7 +19,7 @@ function ChattingPage() {
         <GetFriendList/>
         <GetChat/>
       </div>
-      <button onClick={handleOnClick}>Logout</button>
+      <button className="font-bold" onClick={handleOnClick}>Logout</button>
     </>
   )
 }

@@ -17,7 +17,7 @@ export const getFriendList = async () => {
     }
 }
 
-export const getChat = async (friendId: string) => {
+export const getChat = async (friendId: number) => {
     try{
         const response = await axios.post(GET_CHAT, {
             friendId

@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         username: response.data.data.username,
                         token
                     });
-                    console.log("Response: ", response.data);
                 } else {
                     logout();
                     alert("Token verification failed");
