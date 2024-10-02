@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { getChat, sendMessage } from "../services/operations/ChatAPI";
 import { setRefreshFriendList } from "../redux/slice/eventSlice";
 
-function GetChat() {
+function GetChat({activeUsers}: any) {
   const { refreshFriendList } = useSelector((state: any) => state.event);
   const { friendId, username } = useSelector((state: any) => state.activeUser);
   const [chat, setChat] = useState([]);
@@ -26,6 +26,7 @@ function GetChat() {
       alert(response.message);
     }
   }
+
   useEffect(() => {
     async function handler() {
       if (friendId) { // Ensure friendId is defined before fetching
@@ -40,6 +41,7 @@ function GetChat() {
       <h1 className="font-bold">Chat Header</h1>
       <div>Friend Name: {username}</div>
       <div>Friend ID: {friendId}</div>
+      <div>Friend Status: {activeUsers[friendId]? "Online" : "Offline"}</div>
       <div>My UserId: {user?.userId}</div>
       <div className="font-bold">Conversation</div>
       <div className=" border-2 border-black w-[500px]">
