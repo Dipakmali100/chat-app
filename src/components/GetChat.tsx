@@ -39,8 +39,8 @@ function GetChat({activeUsers}: any) {
   return (
     <div className="border-2 border-black">
       <h1 className="font-bold">Chat Header</h1>
-      <div>Friend Name: {username}</div>
-      <div>Friend ID: {friendId}</div>
+      <div>Friend Name: {username===""?"Not Selected" : username}</div>
+      <div>Friend ID: {friendId===0?"Not Selected" : friendId}</div>
       <div>Friend Status: {activeUsers[friendId]? "Online" : "Offline"}</div>
       <div>My UserId: {user?.userId}</div>
       <div className="font-bold">Conversation</div>

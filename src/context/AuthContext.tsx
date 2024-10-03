@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
 
     useEffect(() => {
-        console.log(`useEffect called with count: ${count}`);
+        // console.log(`useEffect called with count: ${count}`);
         setCount(count + 1);
         const checkJwtToken = async () => {
             const token = localStorage.getItem('token');

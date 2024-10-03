@@ -3,13 +3,14 @@ import { useAuth } from "../context/AuthContext";
 import SearchUser from "../components/SearchUser";
 import GetFriendList from "../components/GetFriendList";
 import GetChat from "../components/GetChat";
-import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
+import { useSocket } from "../context/SocketContext";
 
 function ChattingPage() {
   const authContext = useAuth();
   const navigate = useNavigate();
   const [activeUsers, setActiveUsers] = useState<any>({});
+  const socket = useSocket();
   const { user }: any = useAuth();
   const userId = user?.userId;
 
@@ -17,34 +18,53 @@ function ChattingPage() {
     authContext?.logout();
     navigate("/login");
   };
-
+  
   useEffect(() => {
-    if (!userId) return; // Exit if userId is not available
+    if (!socket || !userId){
+      console.log("Socket or userId not found");
+      return;
+    }
+    console.log("Socket and userId found");
 
-    const socket = io("http://localhost:3000", {
-      query: { userId: userId }, // Pass userId from context
-      withCredentials: true,
+    // Listen for active users updates
+    socket.on('alreadyOnlineUsers', (data) => {
+      setActiveUsers(data);
+      console.log("Already online users: ", activeUsers);
     });
 
-    // Listen for user status updates
-    socket.on('userStatus', (data) => {
-      console.log("Active users: ",data.users||{});
-      setActiveUsers(data.users||{});
+    // Listen for new active user updates
+    socket.on('newActiveUser', (data) => {
+      setActiveUsers((prevUsers:any) => ({
+        ...prevUsers,
+        [data.userId]: data.socketId // Correctly spread the previous users and update with new user
+      }));
+      console.log("Active users: ", activeUsers);
+    });
+
+    // Listen for remove active user updates
+    socket.on('removeActiveUser', (data) => {
+      setActiveUsers((prevUsers:any) => {
+        const updatedUsers = { ...prevUsers };
+        delete updatedUsers[data.userId];
+        return updatedUsers;
+      });
+      console.log("Active users: ", activeUsers);
     });
 
     // Clean up on component unmount
     return () => {
-      socket.off('userStatus');
-      socket.disconnect(); // Disconnect socket on unmount
+      socket.off('alreadyOnlineUsers');
+      socket.off('newActiveUser');
+      socket.off('removeActiveUser');
     };
-  }, [userId]); // Dependency array to re-run when userId changes
+  }, [socket, userId]); // Dependency array to re-run when userId changes
 
   return (
     <>
       <div>
         <SearchUser />
         <GetFriendList />
-        <GetChat activeUsers={activeUsers}/>
+        <GetChat activeUsers={activeUsers} />
       </div>
       <div>
         <h2>Online Users</h2>
