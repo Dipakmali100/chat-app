@@ -10,12 +10,13 @@ function GetFriendList() {
 
   async function fetchData() {
     const response = await getFriendList();
+    console.log("Fetching friend list due to refreshFriendList change:", refreshFriendList);
     setFriendList(response.data);
   }
   useEffect(() => {
     fetchData();
-    console.log("Refresh friend list: ", refreshFriendList);
   }, [refreshFriendList]);
+  
 
   return (
     <div className='border-2 border-black'>

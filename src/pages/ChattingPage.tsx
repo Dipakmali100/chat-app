@@ -29,7 +29,7 @@ function ChattingPage() {
     // Listen for active users updates
     socket.on('alreadyOnlineUsers', (data) => {
       setActiveUsers(data);
-      console.log("Already online users: ", activeUsers);
+      console.log("Already online users: ", data);
     });
 
     // Listen for new active user updates
@@ -69,7 +69,7 @@ function ChattingPage() {
       <div>
         <h2>Online Users</h2>
         <ul>
-          {Object.entries(activeUsers).map(([userId, socketId]: any) => (
+          {Object.entries(activeUsers).map(([userId]: any) => (
             <li key={userId}>
               User: {userId}
             </li>

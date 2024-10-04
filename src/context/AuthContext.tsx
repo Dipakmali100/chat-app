@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import API_URL from '../constants/API_URL';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setActiveUser } from '../redux/slice/activeUserSlice';
 
 interface User {
     userId: number;
@@ -21,6 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const[count, setCount] = useState(0);
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+    const dispatch = useDispatch();
 
     useEffect(() => {
         // console.log(`useEffect called with count: ${count}`);
@@ -64,6 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = (userData: User) => {
         setUser(userData);
         setIsAuthenticated(true);
+        dispatch(setActiveUser({ friendId: 0, username: "" }));
         localStorage.setItem('token', "Bearer " + userData.token);
     };
 
