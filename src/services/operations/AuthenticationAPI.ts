@@ -3,12 +3,13 @@ import { AuthenticationApi } from "../apis";
 
 const {REGISTER_API, LOGIN_API} = AuthenticationApi;
 
-export const registerApi = async (username: string, password: string) => {
+export const registerApi = async (username: string, password: string, imgUrl: string) => {
     try{
         
         const response = await axios.post(REGISTER_API, {
             username,
-            password
+            password,
+            imgUrl
         })
     
         return response.data;

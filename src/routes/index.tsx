@@ -1,10 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import LandingPage from "../pages/LandingPage";
 import ChattingPage from "../pages/ChattingPage";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
 import PrivateRoute from "./PrivateRoute";
 import OpenRoutes from "./OpenRoute";
+import Authentication from "../pages/Authentication";
 
 export const router = createBrowserRouter([
     {
@@ -12,18 +11,10 @@ export const router = createBrowserRouter([
         element: <LandingPage />
     },
     {
-        path: "/register",
+        path: "/auth",
         element: (
             <OpenRoutes>
-                <Register />
-            </OpenRoutes>
-        )
-    },
-    {
-        path: "/login",
-        element: (
-            <OpenRoutes>
-                <Login />
+                <Authentication />
             </OpenRoutes>
         )
     },

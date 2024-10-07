@@ -60,12 +60,12 @@ function HeroSection() {
                     animate={isInView ? "animate" : ""}
                 >
                     <motion.div variants={fadeInUp}>
-                        <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate("/register")}>
+                        <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate("/auth")}>
                             Get Started
                         </Button>
                     </motion.div>
                     <motion.div variants={fadeInUp}>
-                        <Button variant="outline" className="text-primary border-primary hover:bg-slate-100" onClick={() => navigate("/login")}>
+                        <Button variant="outline" className="text-primary border-primary hover:bg-slate-100" onClick={() => navigate("/auth", { state: { isLogin: true } })}>
                             Login Now
                         </Button>
                     </motion.div>
