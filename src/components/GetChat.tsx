@@ -5,7 +5,7 @@ import { getChat, sendMessage } from "../services/operations/ChatAPI";
 import { setRefreshFriendList } from "../redux/slice/eventSlice";
 import { useSocket } from "../context/SocketContext";
 
-function GetChat({activeUsers}: any) {
+function GetChat({ activeUsers }: any) {
   // const { refreshFriendList } = useSelector((state: any) => state.event);
   const { friendId, username } = useSelector((state: any) => state.activeUser);
   const [chat, setChat] = useState([]);
@@ -23,9 +23,9 @@ function GetChat({activeUsers}: any) {
     if (response.success) {
       await fetchData();
       setMessage("");
-      dispatch(setRefreshFriendList((prevState:any) => !prevState));
+      dispatch(setRefreshFriendList((prevState: any) => !prevState));
       socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, content: message });
-    }else{
+    } else {
       alert(response.message);
     }
   }
@@ -35,73 +35,43 @@ function GetChat({activeUsers}: any) {
       console.log("Socket not found");
       return;
     }
-  
+
     const handleNewMessage = async (data: any) => {
       console.log("New Message From FriendId: ", data.senderId);
       if (Number(data.senderId) === Number(friendId)) {
         handler(); // Fetch new chat data on receiving a new message
       } else {
-        dispatch(setRefreshFriendList((prevState:any) => !prevState)); // This toggles the state
+        dispatch(setRefreshFriendList((prevState: any) => !prevState)); // This toggles the state
       }
     };
-    
-  
+
+
     // Define the handler function here
     const handler = async () => {
       if (friendId) { // Ensure friendId is defined before fetching
         await fetchData();
-        dispatch(setRefreshFriendList((prevState:any) => !prevState));
+        dispatch(setRefreshFriendList((prevState: any) => !prevState));
       }
     };
-  
+
     // Call handler initially
     handler();
-  
+
     // Set up the socket listener
     socket.on("newMessage", handleNewMessage);
-  
+
     // Cleanup function
     return () => {
       socket.off("newMessage", handleNewMessage);
     };
   }, [friendId, username, socket]);
-  
 
-  // useEffect(() => {
-  //   if (!socket){
-  //     console.log("Socket not found");
-  //     return;
-  //   }
-
-  //   socket.on("newMessage", (data: any) => {
-  //     console.log("New Message From FriendId: ", data.senderId);
-  //     if (data.senderId === friendId) {
-  //       // setChat((prevChat: any) => [...prevChat, data]);
-  //       console.log("Handler called");
-  //       handler();
-  //     }else{
-  //       dispatch(setRefreshFriendList(!refreshFriendList));
-  //     }
-  //   })
-
-  //   async function handler() {
-  //     if (friendId) { // Ensure friendId is defined before fetching
-  //       await fetchData();
-  //       dispatch(setRefreshFriendList(!refreshFriendList));
-  //     }
-  //   }
-  //   handler();
-
-  //   return () => {
-  //     socket.off("newMessage");
-  //   };
-  // }, [friendId, username, socket]);
   return (
     <div className="border-2 border-black">
       <h1 className="font-bold">Chat Header</h1>
-      <div>Friend Name: {username===""?"Not Selected" : username}</div>
-      <div>Friend ID: {friendId===0?"Not Selected" : friendId}</div>
-      <div>Friend Status: {activeUsers[friendId]? "Online" : "Offline"}</div>
+      <div>Friend Name: {username === "" ? "Not Selected" : username}</div>
+      <div>Friend ID: {friendId === 0 ? "Not Selected" : friendId}</div>
+      <div>Friend Status: {activeUsers[friendId] ? "Online" : "Offline"}</div>
       <div>My UserId: {user?.userId}</div>
       <div className="font-bold">Conversation</div>
       <div className=" border-2 border-black w-[500px]">
@@ -119,7 +89,7 @@ function GetChat({activeUsers}: any) {
         }
         <div>
           <form className="flex" onSubmit={handleMessageSubmit}>
-            <input type="text" placeholder="Enter message" value={message} className="w-4/6 border-2 border-black" onChange={(e) => setMessage(e.target.value)}/>
+            <input type="text" placeholder="Enter message" value={message} className="w-4/6 border-2 border-black" onChange={(e) => setMessage(e.target.value)} />
             <button type="submit" className="w-2/6 border-2 border-black">Send</button>
           </form>
         </div>

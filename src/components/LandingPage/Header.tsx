@@ -12,6 +12,8 @@ import {
     SheetFooter,
     SheetTrigger,
 } from "../../components/ui/sheet";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "../../hooks/use-toast";
 
 export default function Header({ variant }: { variant: string }) {
     const { scrollYProgress } = useScroll();
@@ -23,6 +25,17 @@ export default function Header({ variant }: { variant: string }) {
     });
 
     const controls = useAnimationControls();
+    const authContext = useAuth();
+    const { user }: any = useAuth();
+    const userId = user?.userId;
+
+    const handleLogout = () => {
+        authContext?.logout();
+        navigate("/");
+        toast({
+          title: "You are logged out"
+        })
+      };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -64,7 +77,7 @@ export default function Header({ variant }: { variant: string }) {
                 <ScrollLink className="flex items-center justify-center" to="heroSection"
                     smooth={true}
                     duration={800}
-                    offset={-80} onClick={()=>navigate("/")}>
+                    offset={-80} onClick={() => navigate("/")}>
                     <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
                         <MessageCircleMore className="h-6 w-6 text-primary" color="white" />
                     </motion.div>
@@ -105,8 +118,8 @@ export default function Header({ variant }: { variant: string }) {
                                     </ScrollLink>
                                 ) : (
                                     <Link className="text-sm font-medium hover:text-slate-200 transition-colors" to="#">
-                                        <Button variant="outline" className="text-primary border-primary hover:bg-slate-100" onClick={() => navigate("/auth")}>
-                                            Register/Login
+                                        <Button variant="outline" className="text-primary border-primary hover:bg-slate-100" onClick={() => { userId ? handleLogout() : navigate("/auth") }}>
+                                            {userId ? "Logout" : "Register/Login"}
                                         </Button>
                                     </Link>
                                 )}
@@ -149,7 +162,7 @@ export default function Header({ variant }: { variant: string }) {
                                 </div>
                                 <SheetFooter>
                                     <SheetClose asChild>
-                                        <Button type="submit" onClick={() => navigate("/login")}>Register/Login</Button>
+                                        <Button type="submit" onClick={() => { userId ? navigate("/chat") : navigate("/auth") }}>{userId ? "Logout" : "Register/Login"}</Button>
                                     </SheetClose>
                                 </SheetFooter>
                             </SheetContent>

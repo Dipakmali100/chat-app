@@ -33,7 +33,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-black text-white overflow-hidden">
 
-      <Header variant="landingPage"/>
+      <Header variant="landingPage" />
       <main className="flex-1">
         <Element name="heroSection">
           <HeroSection />

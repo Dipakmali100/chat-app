@@ -20,8 +20,10 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "../ui/carousel";
-import { registerApi } from "../../services/operations/AuthenticationAPI";
+import { loginApi, registerApi } from "../../services/operations/AuthenticationAPI";
 import { useToast } from "../../hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 function Register() {
     const [username, setUsername] = useState("");
@@ -30,18 +32,51 @@ function Register() {
     const [confirmPicIndex, setConfirmPicIndex] = useState(0);
     const [carouselSelectedIndex, setCarouselSelectedIndex] = useState(confirmPicIndex);
     const { toast } = useToast();
+    const navigate = useNavigate();
+    const authContext = useAuth(); // Get the context
+
+    // Ensure authContext is defined
+    if (!authContext) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+
+    const { login } = authContext;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const response = await registerApi(username, password, people[confirmPicIndex].image);
-
         if (response.success) {
+            const response: any = await loginApi(username, password);
+            if (response.success) {
+                login({ userId: response.data.userId, username: username, imgUrl: response.data.imgUrl, token: response.data.token });
+                navigate("/chat");
+                toast({
+                    title: response.message,
+                    duration: 3000,
+                })
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: response.message,
+                    duration: 3000,
+                })
+            }
+        } else {
             toast({
+                variant: 'destructive',
                 title: response.message,
                 duration: 3000,
             })
-        }else{
+        }
+
+        if (response.success) {
+            navigate("/chat");
+            toast({
+                title: response.message,
+                duration: 3000,
+            });
+        } else {
             toast({
                 variant: 'destructive',
                 title: response.message,
@@ -101,18 +136,18 @@ function Register() {
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="username">Set Username</Label>
-                        <Input type='text' placeholder="Enter Username" onChange={(e) => setUsername((e.target as HTMLInputElement).value)}/>
+                        <Input type='text' placeholder="Enter Username" value={username.toLowerCase()} onChange={(e) => setUsername((e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Set Password</Label>
-                        <Input type='password' placeholder="Enter Password" onChange={(e) => setPassword((e.target as HTMLInputElement).value)}/>
+                        <Input type='password' placeholder="Enter Password" onChange={(e) => setPassword((e.target as HTMLInputElement).value)} />
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Confirm Password</Label>
-                        <Input type='password' placeholder="Enter Password" onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value)}/>
+                        <Input type='password' placeholder="Enter Password" onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value)} />
                     </div>
                     <div className='pt-2'>
-                        <Button className={`${username && password && confirmPassword && password===confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={username && password && confirmPassword && password===confirmPassword ? handleSubmit : () => {}}>Register Now</Button>
+                        <Button className={`${username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>
                     </div>
                 </CardContent>
             </Card>

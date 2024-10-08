@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { connectUser, searchUser } from '../services/operations/ConnectionAPI';
+import { useDispatch } from 'react-redux';
+import { setRefreshFriendList } from '../redux/slice/eventSlice';
 
 function SearchUser() {
     const [username, setUsername] = useState<string>('');
     const [matchedUsers, setMatchedUsers] = useState([]);
+    const dispatch = useDispatch();
 
     const handleSearchCall = async () => {
         const response: any = await searchUser(username);
@@ -17,6 +20,7 @@ function SearchUser() {
     const handleConnect = async (userId: number) => {
         await connectUser(userId);
         await handleSearchCall();
+        dispatch(setRefreshFriendList((prevState: any) => !prevState));
     }
     return (
         <div className='border-2 border-black'>

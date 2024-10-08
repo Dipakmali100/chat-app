@@ -5,6 +5,7 @@ import GetFriendList from "../components/GetFriendList";
 import GetChat from "../components/GetChat";
 import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketContext";
+import { toast } from "../hooks/use-toast";
 
 function ChattingPage() {
   const authContext = useAuth();
@@ -16,7 +17,10 @@ function ChattingPage() {
 
   const handleOnClick = () => {
     authContext?.logout();
-    navigate("/login");
+    navigate("/auth");
+    toast({
+      title: "You are logged out"
+    })
   };
   
   useEffect(() => {

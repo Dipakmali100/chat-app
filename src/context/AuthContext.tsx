@@ -4,17 +4,20 @@ import API_URL from '../constants/API_URL';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { setActiveUser } from '../redux/slice/activeUserSlice';
+import { toast } from '../hooks/use-toast';
 
 interface User {
     userId: number;
     username: string;
-    token: string
+    imgUrl?: string;
+    token: string;
 }
 
 interface AuthContextType {
     user: User | null;
     login: (userData: User) => void;
     logout: () => void;
+    isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,12 +55,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     });
                 } else {
                     logout();
-                    alert("Token verification failed");
+                    toast({
+                        title: "Authentication error",
+                        description: "Please login again",
+                        variant: "destructive",
+                        duration: 3000
+                    })
                 }
             } catch (err) {
-                console.error("Error while verifying token: ", err);
                 setIsAuthenticated(false);
                 logout();
+                toast({
+                    title: "Authentication error", // Error while verifying token
+                    description: "Please login again",
+                    variant: "destructive",
+                    duration: 3000
+                })
             }
         }
 

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { AnimatedTooltip } from "../../components/ui/animated-tooltip";
 import { people } from "../../constants/HERO_PEOPLE";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -22,6 +23,8 @@ function HeroSection() {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
     const navigate = useNavigate();
+    const { user }: any = useAuth();
+    const userId = user?.userId;
 
     return (
         <section ref={ref} className="w-full pt-32 md:py-24 lg:py-32 xl:py-48 px-4">
@@ -59,16 +62,24 @@ function HeroSection() {
                     initial="initial"
                     animate={isInView ? "animate" : ""}
                 >
-                    <motion.div variants={fadeInUp}>
-                        <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate("/auth")}>
-                            Get Started
+                    {userId ? <motion.div variants={fadeInUp}>
+                        <Button className="bg-white hover:bg-white/90 text-black" onClick={() => navigate("/chat")}>
+                            Explore Chat
                         </Button>
                     </motion.div>
-                    <motion.div variants={fadeInUp}>
-                        <Button variant="outline" className="text-primary border-primary hover:bg-slate-100" onClick={() => navigate("/auth", { state: { isLogin: true } })}>
-                            Login Now
-                        </Button>
-                    </motion.div>
+                        : <>
+                            <motion.div variants={fadeInUp}>
+                                <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate("/auth")}>
+                                    Get Started
+                                </Button>
+                            </motion.div>
+                            <motion.div variants={fadeInUp}>
+                                <Button variant="outline" className="text-primary border-primary hover:bg-slate-100" onClick={() => navigate("/auth", { state: { isLogin: true } })}>
+                                    Login Now
+                                </Button>
+                            </motion.div>
+                        </>
+                    }
                 </motion.div>
             </motion.div>
         </section>
