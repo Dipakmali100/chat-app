@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
+import API_URL from "../constants/API_URL";
 
 const SocketContext = createContext<Socket | null>(null);
 
@@ -12,7 +13,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user?.userId) return; // Ensure userId is available before connecting
 
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io(API_URL, {
       query: { userId: user.userId }, // Pass userId
       withCredentials: true,
     });

@@ -4,6 +4,7 @@ import ChattingPage from "../pages/ChattingPage";
 import PrivateRoute from "./PrivateRoute";
 import OpenRoutes from "./OpenRoute";
 import Authentication from "../pages/Authentication";
+import NewChattingPage from "../pages/NewChattingPage";
 
 export const router = createBrowserRouter([
     {
@@ -22,7 +23,8 @@ export const router = createBrowserRouter([
         path: "/chat",
         element: (
             <PrivateRoute>
-                <ChattingPage />
+                {/* <ChattingPage /> */}
+                <NewChattingPage />
             </PrivateRoute>
         )
     }

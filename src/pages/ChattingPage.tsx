@@ -22,9 +22,9 @@ function ChattingPage() {
       title: "You are logged out"
     })
   };
-  
+
   useEffect(() => {
-    if (!socket || !userId){
+    if (!socket || !userId) {
       console.log("Socket or userId not found");
       return;
     }
@@ -38,7 +38,7 @@ function ChattingPage() {
 
     // Listen for new active user updates
     socket.on('newActiveUser', (data) => {
-      setActiveUsers((prevUsers:any) => ({
+      setActiveUsers((prevUsers: any) => ({
         ...prevUsers,
         [data.userId]: data.socketId // Correctly spread the previous users and update with new user
       }));
@@ -47,7 +47,7 @@ function ChattingPage() {
 
     // Listen for remove active user updates
     socket.on('removeActiveUser', (data) => {
-      setActiveUsers((prevUsers:any) => {
+      setActiveUsers((prevUsers: any) => {
         const updatedUsers = { ...prevUsers };
         delete updatedUsers[data.userId];
         return updatedUsers;
@@ -65,12 +65,16 @@ function ChattingPage() {
 
   return (
     <>
-      <div>
-        <SearchUser />
-        <GetFriendList />
-        <GetChat activeUsers={activeUsers} />
+      <div className="flex h-screen w-screen bg-black text-white">
+        <div className="w-1/3 border-r-2 border-white">
+          <SearchUser />
+          <GetFriendList />
+        </div>
+        <div className="w-2/3">
+          <GetChat activeUsers={activeUsers} />
+        </div>
       </div>
-      <div>
+      {/* <div>
         <h2>Online Users</h2>
         <ul>
           {Object.entries(activeUsers).map(([userId]: any) => (
@@ -80,7 +84,7 @@ function ChattingPage() {
           ))}
         </ul>
       </div>
-      <button className="font-bold" onClick={handleOnClick}>Logout</button>
+      <button className="font-bold" onClick={handleOnClick}>Logout</button> */}
     </>
   );
 }
