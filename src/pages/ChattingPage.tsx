@@ -74,7 +74,7 @@ function ChattingPage() {
           <GetChat activeUsers={activeUsers} />
         </div>
       </div>
-      {/* <div>
+      <div>
         <h2>Online Users</h2>
         <ul>
           {Object.entries(activeUsers).map(([userId]: any) => (
@@ -84,7 +84,7 @@ function ChattingPage() {
           ))}
         </ul>
       </div>
-      <button className="font-bold" onClick={handleOnClick}>Logout</button> */}
+      <button className="font-bold" onClick={handleOnClick}>Logout</button>
     </>
   );
 }
