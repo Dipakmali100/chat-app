@@ -2,8 +2,13 @@ import { Button } from '../ui/button'
 import { ArrowLeft, Send } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Input } from '../ui/input'
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveUser } from '../../redux/slice/activeUserSlice';
 
-function ChatView({ selectedFriend, setSelectedFriend }: any) {
+function ChatView() {
+    const { friendId, username, imgUrl } = useSelector((state: any) => state.activeUser);
+    const dispatch = useDispatch();
+
     return (
         <div className="flex-grow flex flex-col h-full">
             <div className="flex items-center mb-4 pb-2 border-b border-gray-700">
@@ -11,16 +16,16 @@ function ChatView({ selectedFriend, setSelectedFriend }: any) {
                     variant="ghost"
                     size="icon"
                     className="mr-2 md:hidden"
-                    onClick={() => setSelectedFriend(null)}
+                    onClick={() => dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }))}
                 >
                     <ArrowLeft className="h-6 w-6" />
                 </Button>
                 <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage src={`/placeholder-avatar-${selectedFriend?.id}.jpg`} />
-                    <AvatarFallback>{selectedFriend?.name[0]}</AvatarFallback>
+                    <AvatarImage src={imgUrl} />
+                    <AvatarFallback>{username[0]}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <h2 className="font-semibold">{selectedFriend?.name}</h2>
+                    <h2 className="font-semibold">{username}</h2>
                     <p className="text-sm text-gray-400">Online</p>
                 </div>
             </div>
