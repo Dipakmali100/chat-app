@@ -68,7 +68,7 @@
 
 /* Custom Scrollbar Styles for All Scrollable Elements */
 ::-webkit-scrollbar {
-  width: 8px; /* Width of the scrollbar */
+  width: 5px; /* Width of the scrollbar */
   background-color: #000000; /* Background of the scrollbar */
 }
 

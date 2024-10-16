@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { getChat, sendMessage } from "../services/operations/ChatAPI";
 import { setRefreshFriendList } from "../redux/slice/eventSlice";
 import { useSocket } from "../context/SocketContext";
+import { randomInRange } from "@tsparticles/engine";
 
 function GetChat({ activeUsers }: any) {
   // const { refreshFriendList } = useSelector((state: any) => state.event);
@@ -23,7 +24,7 @@ function GetChat({ activeUsers }: any) {
     if (response.success) {
       await fetchData();
       setMessage("");
-      dispatch(setRefreshFriendList((prevState: any) => !prevState));
+      dispatch(setRefreshFriendList(Math.random()));
       socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, content: message });
     } else {
       alert(response.message);
@@ -41,7 +42,7 @@ function GetChat({ activeUsers }: any) {
       if (Number(data.senderId) === Number(friendId)) {
         handler(); // Fetch new chat data on receiving a new message
       } else {
-        dispatch(setRefreshFriendList((prevState: any) => !prevState)); // This toggles the state
+        dispatch(setRefreshFriendList(Math.random())); // This toggles the state
       }
     };
 
@@ -50,7 +51,7 @@ function GetChat({ activeUsers }: any) {
     const handler = async () => {
       if (friendId) { // Ensure friendId is defined before fetching
         await fetchData();
-        dispatch(setRefreshFriendList((prevState: any) => !prevState));
+        dispatch(setRefreshFriendList(Math.random()));
       }
     };
 

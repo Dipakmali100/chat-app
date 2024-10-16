@@ -20,7 +20,7 @@ function SearchUser() {
     const handleConnect = async (userId: number) => {
         await connectUser(userId);
         await handleSearchCall();
-        dispatch(setRefreshFriendList((prevState: any) => !prevState));
+        dispatch(setRefreshFriendList(Math.random()));
     }
     return (
         <div className='border-2 border-black'>

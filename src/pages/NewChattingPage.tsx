@@ -3,10 +3,65 @@ import ChatView from '../components/ChattingPage/ChatView';
 import FriendList from '../components/ChattingPage/FriendList';
 import Header from '../components/ChattingPage/Header';
 import SearchView from '../components/ChattingPage/SearchView';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
+import { useSocket } from '../context/SocketContext';
+import { setRefreshFriendList } from '../redux/slice/eventSlice';
 
 export default function NewChattingPage() {
   const { friendId } = useSelector((state: any) => state.activeUser);
+  const [activeUsers, setActiveUsers] = useState<any>({});
+  const socket = useSocket();
+  const dispatch = useDispatch();
+  const { user }: any = useAuth();
+  const userId = user?.userId;
+
+  useEffect(() => {
+    if (!socket || !userId) {
+      console.log("Socket or userId not found");
+      return;
+    }
+    console.log("Socket and userId found");
+
+    // Listen for active users updates
+    socket.on('alreadyOnlineUsers', (data) => {
+      setActiveUsers(data);
+      console.log("Already online users: ", data);
+    });
+
+    // Listen for new active user updates
+    socket.on('newActiveUser', (data) => {
+      setActiveUsers((prevUsers: any) => ({
+        ...prevUsers,
+        [data.userId]: data.socketId // Correctly spread the previous users and update with new user
+      }));
+      console.log("Active users: ", activeUsers);
+    });
+
+    // Listen for remove active user updates
+    socket.on('removeActiveUser', (data) => {
+      setActiveUsers((prevUsers: any) => {
+        const updatedUsers = { ...prevUsers };
+        delete updatedUsers[data.userId];
+        return updatedUsers;
+      });
+      console.log("Active users: ", activeUsers);
+    });
+
+    // Listen for new message
+    socket.on('newMessage', () => {
+      console.log("Reload friend list from parent page");
+      dispatch(setRefreshFriendList(Math.random()));
+    });
+
+    // Clean up on component unmount
+    return () => {
+      socket.off('alreadyOnlineUsers');
+      socket.off('newActiveUser');
+      socket.off('removeActiveUser');
+    };
+  }, [socket, userId]); // Dependency array to re-run when userId changes
 
   return (
     <div className="flex h-screen bg-black text-white">
@@ -19,8 +74,8 @@ export default function NewChattingPage() {
           <FriendList />
         </div>
       </div>
-      <div className={`w-full md:w-2/3 p-4 md:border-l md:border-gray-700 ${friendId !== 0 ? 'block' : 'hidden md:block'}`}>
-        {friendId !== 0 ? <ChatView /> : <ChatPlaceholder />}
+      <div className={`w-full md:w-2/3 py-4 md:border-l md:border-gray-700 ${friendId !== 0 ? 'block' : 'hidden md:block'}`}>
+        {friendId !== 0 ? <ChatView activeUsers={activeUsers}/> : <ChatPlaceholder />}
       </div>
     </div>
   )

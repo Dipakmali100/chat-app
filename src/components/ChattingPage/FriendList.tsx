@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { useEffect, useState } from "react";
 import { getFriendList } from "../../services/operations/ChatAPI";
 import { setActiveUser } from "../../redux/slice/activeUserSlice";
+import { Check, CheckCheck } from "lucide-react";
 
 type Friend = {
     senderId: number;
@@ -16,36 +17,6 @@ type Friend = {
 }
 
 function FriendList() {
-    // const friends: Friend[] = [
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    //     { id: 1, name: "Alice", lastMsg: "Hey there!", time: "10:30", unread: 2 },
-    //     { id: 2, name: "Bob", lastMsg: "How are you?", time: "09:45", unread: 0 },
-    //     { id: 3, name: "Charlie", lastMsg: "Meeting at 2?", time: "Yesterday", unread: 5 },
-    // ]
-
     const { refreshFriendList } = useSelector((state: any) => state.event);
     const [friendList, setFriendList] = useState<Friend[]>([]);
     const dispatch = useDispatch();
@@ -74,7 +45,18 @@ function FriendList() {
                         </Avatar>
                         <div className="flex-grow">
                             <h3 className="font-semibold">{friend.username}</h3>
-                            <p className="text-sm text-gray-400">{friend.content}</p>
+                            <div className="flex">
+                                <span className="pt-1">
+                                    {friend.statusForUI === "sent" && (friend.status === "sent" ? (
+                                        <Check size={16} color='grey' />
+                                    ) : friend.status === "received" ? (
+                                        <CheckCheck size={16} color='grey' />
+                                    ) : (
+                                        <CheckCheck size={16} color='white' />
+                                    ))}
+                                </span>
+                                <p className={`text-sm text-gray-400 ${friend.statusForUI==="sent" && "ml-1"}`}>{friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}</p>
+                            </div>
                         </div>
                         <div className="flex flex-col items-end">
                             <span className="text-xs text-gray-500">{friend.date === "Today" ? friend.time : friend.date}</span>

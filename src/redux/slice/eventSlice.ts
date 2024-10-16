@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const initialState = {
-    refreshFriendList: false,
-    refreshChat: false
+    refreshFriendList: 0,
+    refreshChat: 0
 }
 
 const eventSlice = createSlice({
