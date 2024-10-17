@@ -36,6 +36,9 @@ export default function NewChattingPage() {
         ...prevUsers,
         [data.userId]: data.socketId // Correctly spread the previous users and update with new user
       }));
+
+      // Refresh friend list due to new active user for latest msg status
+      dispatch(setRefreshFriendList(Math.random()));
       console.log("Active users: ", activeUsers);
     });
 
@@ -51,7 +54,6 @@ export default function NewChattingPage() {
 
     // Listen for new message
     socket.on('newMessage', () => {
-      console.log("Reload friend list from parent page");
       dispatch(setRefreshFriendList(Math.random()));
     });
 
@@ -60,6 +62,7 @@ export default function NewChattingPage() {
       socket.off('alreadyOnlineUsers');
       socket.off('newActiveUser');
       socket.off('removeActiveUser');
+      socket.off('newMessage');
     };
   }, [socket, userId]); // Dependency array to re-run when userId changes
 

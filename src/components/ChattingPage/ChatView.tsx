@@ -21,6 +21,7 @@ function ChatView({ activeUsers }: any) {
     async function fetchData() {
         const response = await getChat(friendId);
         setChat(response.data);
+        console.log("Chat got refreshed");
     }
     async function handleMessageSubmit(e: any) {
         e.preventDefault();
@@ -77,6 +78,13 @@ function ChatView({ activeUsers }: any) {
             socket.off("newMessage", handleNewMessage);
         };
     }, [friendId, username, socket]);
+
+    useEffect(() => {
+        // when this chat component is opened, then it will notify the server
+        if (friendId) {
+            socket?.emit("chatOpened", { senderId: user?.userId, receiverId: friendId });
+        }
+    },[friendId]);
 
     return (
         <div className="flex-grow flex flex-col h-full">
