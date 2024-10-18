@@ -1,7 +1,6 @@
-import { Button } from '../ui/button'
-import { ArrowLeft, Check, CheckCheck, Send } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { Input } from '../ui/input'
+import { Button } from '../ui/button';
+import { ArrowLeft, Check, CheckCheck, Send } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveUser } from '../../redux/slice/activeUserSlice';
 import { useEffect, useRef, useState } from 'react';
@@ -9,9 +8,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { getChat, sendMessage } from '../../services/operations/ChatAPI';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
+import { Textarea } from '../ui/textarea';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl } = useSelector((state: any) => state.activeUser);
+    const { refreshChat } = useSelector((state: any) => state.event);
     const [chat, setChat] = useState([]);
     const [message, setMessage] = useState("");
     const { user }: any = useAuth();
@@ -84,7 +85,17 @@ function ChatView({ activeUsers }: any) {
         if (friendId) {
             socket?.emit("chatOpened", { senderId: user?.userId, receiverId: friendId });
         }
-    },[friendId]);
+    }, [friendId]);
+
+    useEffect(() => {
+        const refreshChatHandler = async () => {
+            if (parseInt(refreshChat) === friendId) {
+                await fetchData();
+            }
+        }
+        refreshChatHandler();
+        console.log("Refresh Chat: ", refreshChat);
+    }, [refreshChat]);
 
     return (
         <div className="flex-grow flex flex-col h-full">
@@ -112,14 +123,28 @@ function ChatView({ activeUsers }: any) {
                     (message.statusForUI === "received" ? (
                         <div className="mb-2" key={message.id}>
                             <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
-                                <p className='text-black break-words'>{message.content}</p>
+                                <p className='text-black break-words'>
+                                    {message.content.split('\n').map((item: string, index: number) => (
+                                        <span key={index}>
+                                            {item}
+                                            <br />
+                                        </span>
+                                    ))}
+                                </p>
                                 <span className="text-xs text-gray-500">{message.time}</span>
                             </div>
                         </div>
                     ) : (
                         <div className="mb-2 text-right" key={message.id}>
                             <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
-                                <p className='text-left break-words'>{message.content}</p>
+                                <p className='text-left break-words'>
+                                    {message.content.split('\n').map((item: string, index: number) => (
+                                        <span key={index}>
+                                            {item}
+                                            <br />
+                                        </span>
+                                    ))}
+                                </p>
                                 <div className='flex justify-between py-2 gap-2'>
                                     <p className="text-xs text-gray-500">{message.time}</p>
                                     {message.status === "sent" ? (
@@ -131,7 +156,6 @@ function ChatView({ activeUsers }: any) {
                                     )}
                                 </div>
                             </div>
-
                         </div>
                     ))
                 ))}
@@ -142,15 +166,28 @@ function ChatView({ activeUsers }: any) {
 
             <form onSubmit={handleMessageSubmit}>
                 <div className="flex px-2 md:px-4">
-                    <Input
-                        className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500"
+                    <Textarea
+                        className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500 h-8 max-h-20"
                         placeholder="Type Message Here..."
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                            const isTabletOrLarger = window.innerWidth > 768;
+                            if (isTabletOrLarger && e.key === 'Enter') {
+                                if (e.shiftKey) {
+                                    // Allow new line
+                                    return;
+                                } else {
+                                    handleMessageSubmit(e); // Call your submit function
+                                }
+                            }
+                        }}
                     />
-                    <Button size="icon" type='submit' className="bg-white text-black hover:bg-gray-200">
-                        <Send className="h-4 w-4" />
-                    </Button>
+                    <div className='flex flex-col justify-end'>
+                        <Button size="icon" type='submit' className="bg-white text-black hover:bg-gray-200">
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             </form>
         </div>

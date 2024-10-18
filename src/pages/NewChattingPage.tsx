@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
-import { setRefreshFriendList } from '../redux/slice/eventSlice';
+import { setRefreshChat, setRefreshFriendList } from '../redux/slice/eventSlice';
 
 export default function NewChattingPage() {
   const { friendId } = useSelector((state: any) => state.activeUser);
@@ -39,6 +39,7 @@ export default function NewChattingPage() {
 
       // Refresh friend list due to new active user for latest msg status
       dispatch(setRefreshFriendList(Math.random()));
+      dispatch(setRefreshChat(parseInt(data.userId) + Math.random()));
       console.log("Active users: ", activeUsers);
     });
 
