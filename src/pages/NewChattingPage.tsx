@@ -70,11 +70,11 @@ export default function NewChattingPage() {
   return (
     <div className="flex h-screen bg-black text-white">
       <div className={`w-full md:w-1/3 flex flex-col ${friendId !== 0 ? 'hidden md:flex' : 'flex'}`}>
-        <div className="px-4 pt-4">
+        <div className="px-4 pt-4 pb-2">
           <Header />
           <SearchView />
         </div>
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto px-4">
           <FriendList />
         </div>
       </div>

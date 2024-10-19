@@ -12,7 +12,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { people } from '../../constants/HERO_PEOPLE';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Carousel,
     CarouselContent,
@@ -20,10 +20,12 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "../ui/carousel";
-import { loginApi, registerApi } from "../../services/operations/AuthenticationAPI";
+import { loginApi, registerApi, uniqueUsernameCheck } from "../../services/operations/AuthenticationAPI";
 import { useToast } from "../../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import useDebouncedValue from "../../hooks/useDebouncedValue";
+import Loader from "../../assets/Loader.svg";
 
 function Register() {
     const [username, setUsername] = useState("");
@@ -31,6 +33,9 @@ function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [confirmPicIndex, setConfirmPicIndex] = useState(0);
     const [carouselSelectedIndex, setCarouselSelectedIndex] = useState(confirmPicIndex);
+    const [loading, setLoading] = useState(true);
+    const [isUniqueUsername, setIsUniqueUsername] = useState(false);
+    const debouncingSearchValue = useDebouncedValue(username, 500);
     const { toast } = useToast();
     const navigate = useNavigate();
     const authContext = useAuth(); // Get the context
@@ -84,6 +89,24 @@ function Register() {
             })
         }
     }
+
+    useEffect(() => {
+        if (!debouncingSearchValue) {
+            return;
+        }
+
+        const fetchData = async () => {
+            const response = await uniqueUsernameCheck(debouncingSearchValue);
+            setIsUniqueUsername(response.success);
+            setLoading(false);
+        };
+
+        fetchData();
+    }, [debouncingSearchValue]);
+
+    useEffect(() => {
+        setLoading(true);
+    }, [username]);
     return (
         <div>
             <Card>
@@ -137,6 +160,20 @@ function Register() {
                     <div className="space-y-1">
                         <Label htmlFor="username">Set Username</Label>
                         <Input type='text' placeholder="Enter Username" value={username.toLowerCase()} onChange={(e) => setUsername((e.target as HTMLInputElement).value)} />
+                        {username && (
+                            loading ? (
+                                <div className='flex'>
+                                    <img src={Loader} alt="loader" className="h-4 w-4 pt-1" />
+                                    <p className="font-semibold text-sm">Checking availability...</p>
+                                </div>
+                            ) : (
+                                !isUniqueUsername ? (
+                                    <div className='text-red-500 font-semibold text-sm flex gap-1'><p>&#10008;</p><p>Username already taken</p></div>
+                                ) : (
+                                    <div className='text-green-500 font-semibold text-sm flex gap-1'><p>&#10003;</p><p>Username is available</p></div>
+                                )
+                            )
+                        )}
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Set Password</Label>
@@ -147,7 +184,7 @@ function Register() {
                         <Input type='password' placeholder="Enter Password" onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value)} />
                     </div>
                     <div className='pt-2'>
-                        <Button className={`${username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>
+                        <Button className={`${isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>
                     </div>
                 </CardContent>
             </Card>
