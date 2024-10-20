@@ -97,6 +97,7 @@ function Register() {
 
         const fetchData = async () => {
             const response = await uniqueUsernameCheck(debouncingSearchValue);
+            console.log("debouncingSearchValue: ", debouncingSearchValue);
             setIsUniqueUsername(response.success);
             setLoading(false);
         };
@@ -159,7 +160,7 @@ function Register() {
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="username">Set Username</Label>
-                        <Input type='text' placeholder="Enter Username" value={username.toLowerCase()} onChange={(e) => setUsername((e.target as HTMLInputElement).value)} />
+                        <Input type='text' placeholder="Enter Username" value={username} onChange={(e) => setUsername((e.target as HTMLInputElement).value.toLowerCase().trim().slice(0, 24))} />
                         {username && (
                             loading ? (
                                 <div className='flex'>
@@ -177,11 +178,11 @@ function Register() {
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Set Password</Label>
-                        <Input type='password' placeholder="Enter Password" onChange={(e) => setPassword((e.target as HTMLInputElement).value)} />
+                        <Input type='password' placeholder="Enter Password" value={password} onChange={(e) => setPassword((e.target as HTMLInputElement).value.trim())} />
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Confirm Password</Label>
-                        <Input type='password' placeholder="Enter Password" onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value)} />
+                        <Input type='password' placeholder="Enter Password" value={confirmPassword} onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value.trim())} />
                     </div>
                     <div className='pt-2'>
                         <Button className={`${isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>

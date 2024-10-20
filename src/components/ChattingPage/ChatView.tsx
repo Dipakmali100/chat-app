@@ -114,7 +114,7 @@ function ChatView({ activeUsers }: any) {
                 </Avatar>
                 <div>
                     <h2 className="font-semibold">{username}</h2>
-                    <p className={`text-sm ${activeUsers[friendId] ? "text-green-500" : "text-gray-400"}`}>{activeUsers[friendId] ? "Online" : "Offline"}</p>
+                    <p className={`text-sm ${activeUsers[friendId] ? "text-green-500 font-bold" : "text-gray-400"}`}>{activeUsers[friendId] ? "Online" : "Offline"}</p>
                 </div>
             </div>
 

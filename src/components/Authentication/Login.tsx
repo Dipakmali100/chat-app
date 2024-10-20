@@ -47,12 +47,12 @@ function Login() {
                     <div className="space-y-1">
                         <div className="space-y-1">
                             <Label htmlFor="username">Username</Label>
-                            <Input id="username" placeholder="Enter Username" value={username.toLowerCase()} onChange={(e) => setUsername(e.target.value)} />
+                            <Input id="username" placeholder="Enter Username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().trim())} />
                         </div>
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Password</Label>
-                        <Input id="password" type='password' placeholder="Enter Password" onChange={(e) => setPassword(e.target.value)} />
+                        <Input id="password" type='password' placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value.trim())} />
                     </div>
                     <div className='pt-2'>
                         <Button className={`${!username || !password ? 'cursor-not-allowed brightness-50' : ''}`} onClick={!username || !password ? ()=>{} : handleLogin}>Login Now</Button>

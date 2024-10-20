@@ -5,6 +5,7 @@ export const AuthenticationApi = {
     REGISTER_API: `${BASE_URL}/auth/register`,
     LOGIN_API: `${BASE_URL}/auth/login`,
     UNIQUE_USERNAME_CHECK_API: `${BASE_URL}/auth/unique-username`,
+    CHANGE_AVATAR_API: `${BASE_URL}/auth/change-avatar`,
 }
 
 // Connection Routes

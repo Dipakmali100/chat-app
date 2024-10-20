@@ -9,7 +9,7 @@ import { toast } from '../hooks/use-toast';
 interface User {
     userId: number;
     username: string;
-    imgUrl?: string;
+    imgUrl: string;
     token: string;
 }
 
@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setUser({
                         userId: response.data.data.userId,
                         username: response.data.data.username,
+                        imgUrl: response.data.data.imgUrl,
                         token
                     });
                 } else {
@@ -93,6 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const value = {
         user,
         isAuthenticated,
+        setUser,
         login,
         logout
     }
