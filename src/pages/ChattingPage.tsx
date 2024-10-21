@@ -1,27 +1,21 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import SearchUser from "../components/SearchUser";
-import GetFriendList from "../components/GetFriendList";
-import GetChat from "../components/GetChat";
-import { useEffect, useState } from "react";
-import { useSocket } from "../context/SocketContext";
-import { toast } from "../hooks/use-toast";
+import ChatPlaceholder from '../components/ChattingPage/ChatPlaceholder';
+import ChatView from '../components/ChattingPage/ChatView';
+import FriendList from '../components/ChattingPage/FriendList';
+import Header from '../components/ChattingPage/Header';
+import SearchView from '../components/ChattingPage/SearchView';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
+import { useSocket } from '../context/SocketContext';
+import { setRefreshChat, setRefreshFriendList } from '../redux/slice/eventSlice';
 
-function ChattingPage() {
-  const authContext = useAuth();
-  const navigate = useNavigate();
+export default function ChattingPage() {
+  const { friendId } = useSelector((state: any) => state.activeUser);
   const [activeUsers, setActiveUsers] = useState<any>({});
   const socket = useSocket();
+  const dispatch = useDispatch();
   const { user }: any = useAuth();
   const userId = user?.userId;
-
-  const handleOnClick = () => {
-    authContext?.logout();
-    navigate("/auth");
-    toast({
-      title: "You are logged out"
-    })
-  };
 
   useEffect(() => {
     if (!socket || !userId) {
@@ -42,6 +36,10 @@ function ChattingPage() {
         ...prevUsers,
         [data.userId]: data.socketId // Correctly spread the previous users and update with new user
       }));
+
+      // Refresh friend list due to new active user for latest msg status
+      dispatch(setRefreshFriendList(Math.random()));
+      dispatch(setRefreshChat(parseInt(data.userId) + Math.random()));
       console.log("Active users: ", activeUsers);
     });
 
@@ -55,38 +53,34 @@ function ChattingPage() {
       console.log("Active users: ", activeUsers);
     });
 
+    // Listen for new message
+    socket.on('newMessage', () => {
+      dispatch(setRefreshFriendList(Math.random()));
+    });
+
     // Clean up on component unmount
     return () => {
       socket.off('alreadyOnlineUsers');
       socket.off('newActiveUser');
       socket.off('removeActiveUser');
+      socket.off('newMessage');
     };
   }, [socket, userId]); // Dependency array to re-run when userId changes
 
   return (
-    <>
-      <div className="flex h-screen w-screen bg-black text-white">
-        <div className="w-1/3 border-r-2 border-white">
-          <SearchUser />
-          <GetFriendList />
+    <div className="flex h-screen bg-black text-white">
+      <div className={`w-full md:w-1/3 flex flex-col ${friendId !== 0 ? 'hidden md:flex' : 'flex'}`}>
+        <div className="px-4 pt-4 pb-2">
+          <Header />
+          <SearchView />
         </div>
-        <div className="w-2/3">
-          <GetChat activeUsers={activeUsers} />
+        <div className="flex-1 overflow-y-auto px-4">
+          <FriendList />
         </div>
       </div>
-      <div>
-        <h2>Online Users</h2>
-        <ul>
-          {Object.entries(activeUsers).map(([userId]: any) => (
-            <li key={userId}>
-              User: {userId}
-            </li>
-          ))}
-        </ul>
+      <div className={`w-full md:w-2/3 py-4 md:border-l md:border-gray-700 ${friendId !== 0 ? 'block' : 'hidden md:block'}`}>
+        {friendId !== 0 ? <ChatView activeUsers={activeUsers}/> : <ChatPlaceholder />}
       </div>
-      <button className="font-bold" onClick={handleOnClick}>Logout</button>
-    </>
-  );
+    </div>
+  )
 }
-
-export default ChattingPage;

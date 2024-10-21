@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { getFriendList } from "../../services/operations/ChatAPI";
 import { setActiveUser } from "../../redux/slice/activeUserSlice";
 import { Check, CheckCheck } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
+import { Label } from "../ui/label";
 
 type Friend = {
     senderId: number;
@@ -18,13 +20,16 @@ type Friend = {
 
 function FriendList() {
     const { refreshFriendList } = useSelector((state: any) => state.event);
+    const [loader, setLoader] = useState(false);
     const [friendList, setFriendList] = useState<Friend[]>([]);
     const dispatch = useDispatch();
 
     async function fetchData() {
+        setLoader(true);
         const response = await getFriendList();
         console.log("Fetching friend list due to refreshFriendList change:", refreshFriendList);
         setFriendList(response.data);
+        setLoader(false);
     }
     useEffect(() => {
         fetchData();
@@ -33,7 +38,23 @@ function FriendList() {
     return (
         <div className="">
             <div className="flex-grow">
-                {friendList.map((friend: any) => (
+                {friendList.length === 0 ? (
+                    loader ? (
+                        // run the skeleton 10 time
+                        Array.from({ length: 5 }).map(() => (
+                            <div className="flex items-center mb-4 border border-gray-700 rounded-lg p-2 hover:bg-gray-900 transition-colors cursor-pointer">
+                                <Skeleton className="h-10 w-10 rounded-full" />
+                                <div className="space-y-2 ml-2">
+                                    <Skeleton className="h-4 w-[100px] md:w-[200px]" />
+                                    <Skeleton className="h-3 w-[150px] md:w-[250px]" />
+                                </div>
+                            </div>
+                        ))
+                    ) : <div className="text-center p-10">
+                        <Label className="text-xl">No Friends Yet</Label><br />
+                        <Label className="text-md text-gray-400">Start searching to connect with others!</Label>
+                    </div>
+                ) : (friendList.map((friend: any) => (
                     <div
                         key={friend.senderId}
                         className="flex items-center mb-4 border border-gray-700 rounded-lg p-2 hover:bg-gray-900 transition-colors cursor-pointer"
@@ -55,7 +76,7 @@ function FriendList() {
                                         <CheckCheck size={16} color='white' />
                                     ))}
                                 </span>
-                                {friend.content === "" ? <p className="text-sm font-bold text-green-400">&#x2022; New Connection</p> : <p className={`text-sm text-gray-400 ${friend.statusForUI==="sent" && "ml-1"}`}>{friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}</p>}
+                                {friend.content === "" ? <p className="text-sm font-bold text-green-400">&#x2022; New Connection</p> : <p className={`text-sm text-gray-400 ${friend.statusForUI === "sent" && "ml-1"}`}>{friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}</p>}
                             </div>
                         </div>
                         <div className="flex flex-col items-end">
@@ -67,7 +88,7 @@ function FriendList() {
                             )}
                         </div>
                     </div>
-                ))}
+                )))}
             </div>
         </div>
     )

@@ -1,5 +1,5 @@
 import { Button } from '../ui/button';
-import { ArrowLeft, Check, CheckCheck, Send } from 'lucide-react';
+import { ArrowLeft, Check, CheckCheck, Clock3, EllipsisVertical, Send, Trash2, UserRoundX } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveUser } from '../../redux/slice/activeUserSlice';
@@ -9,11 +9,12 @@ import { useSocket } from '../../context/SocketContext';
 import { getChat, sendMessage } from '../../services/operations/ChatAPI';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
 import { Textarea } from '../ui/textarea';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl } = useSelector((state: any) => state.activeUser);
     const { refreshChat } = useSelector((state: any) => state.event);
-    const [chat, setChat] = useState([]);
+    const [chat, setChat] = useState<any>([]);
     const [message, setMessage] = useState("");
     const { user }: any = useAuth();
     const socket = useSocket();
@@ -29,6 +30,13 @@ function ChatView({ activeUsers }: any) {
         if (!message) {
             return;
         }
+        const date = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000));
+        const hours = date.getUTCHours();
+        const minutes = date.getUTCMinutes();
+        const amOrPm = hours >= 12 ? "PM" : "AM";
+        const formattedTime = `${hours % 12 || 12}:${minutes < 10 ? "0" : ""}${minutes} ${amOrPm}`;
+        setChat([...chat, { id: Date.now(), senderId: user?.userId, receiverId: friendId, content: message, status: "going", createdAt: Date.now(), statusForUI: "sent", time: formattedTime, date: date.toDateString() }]);
+
         const response = await sendMessage(friendId, message);
         if (response.success) {
             await fetchData();
@@ -97,24 +105,68 @@ function ChatView({ activeUsers }: any) {
         console.log("Refresh Chat: ", refreshChat);
     }, [refreshChat]);
 
+    // Prevent the back navigation
+    useEffect(() => {
+        // Push a state to the history stack
+        window.history.pushState(null, '', window.location.href);
+
+        const handlePopState = () => {
+            // Prevent the back navigation
+            window.history.pushState(null, '', window.location.href);
+
+            // Dispatch the setActiveUser action
+            dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }));
+        };
+
+        // Add an event listener for the popstate event
+        window.addEventListener('popstate', handlePopState);
+
+        // Cleanup the event listener when the component is unmounted
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
     return (
         <div className="flex-grow flex flex-col h-full">
-            <div className="flex items-center mb-4 pb-2 border-b border-gray-700 md:px-4">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="mr-2 md:hidden"
-                    onClick={() => dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }))}
-                >
-                    <ArrowLeft className="h-6 w-6" />
-                </Button>
-                <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage src={imgUrl} />
-                    <AvatarFallback>{username[0]}</AvatarFallback>
-                </Avatar>
-                <div>
-                    <h2 className="font-semibold">{username}</h2>
-                    <p className={`text-sm ${activeUsers[friendId] ? "text-green-500 font-bold" : "text-gray-400"}`}>{activeUsers[friendId] ? "Online" : "Offline"}</p>
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-700 md:px-4">
+                <div className='flex'>
+                    <div className="flex items-center">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="mr-2 md:hidden"
+                            onClick={() => dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }))}
+                        >
+                            <ArrowLeft className="h-6 w-6" />
+                        </Button>
+                        <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={imgUrl} />
+                            <AvatarFallback>{username[0]}</AvatarFallback>
+                        </Avatar>
+                    </div>
+                    <div>
+                        <h2 className="font-semibold">{username}</h2>
+                        <p className={`text-sm ${activeUsers[friendId] ? "text-green-500 font-bold" : "text-gray-400"}`}>{activeUsers[friendId] ? "Online" : "Offline"}</p>
+                    </div>
+                </div>
+
+                <div className='mr-2 cursor-pointer hover:rounded-full hover:bg-gray-800'>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <EllipsisVertical className='m-2' />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-auto bg-black border-gray-700">
+                            <DropdownMenuItem className="cursor-pointer text-white mt-1">
+                                <Trash2 />
+                                <span>Delete Chat</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer text-white">
+                                <UserRoundX />
+                                <span>Disconnect</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
 
@@ -151,8 +203,10 @@ function ChatView({ activeUsers }: any) {
                                         <Check size={16} color='grey' />
                                     ) : message.status === "received" ? (
                                         <CheckCheck size={16} color='grey' />
-                                    ) : (
+                                    ) : message.status === "seen" ? (
                                         <CheckCheck size={16} color='white' />
+                                    ) : (
+                                        <Clock3 size={16} color='grey' />
                                     )}
                                 </div>
                             </div>

@@ -8,7 +8,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -17,8 +16,6 @@ import { Button } from "../ui/button";
 import { people } from "../../constants/HERO_PEOPLE";
 import { useState } from "react";
 import { changeAvatar } from "../../services/operations/AuthenticationAPI";
-
-
 
 function Header() {
     const { user }: any = useAuth();
@@ -71,17 +68,17 @@ function Header() {
                     <DropdownMenuTrigger asChild>
                         <img src={user?.imgUrl} alt="Profile" className="h-10 w-10 rounded-full hover:brightness-50 cursor-pointer" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-auto">
-                        <div className="flex justify-center font-bold text-lg font-username pt-1">{user?.username}</div>
-                        <DropdownMenuSeparator />
+                    <DropdownMenuContent className="w-auto bg-black border-gray-700">
+                        <div className="flex justify-center font-bold text-lg font-username py-1 text-white border-b-2 border-gray-700">{user?.username}</div>
+                        {/* <DropdownMenuSeparator className="text-black"/> */}
 
                         <DialogTrigger asChild onClick={() => setCarouselSelectedIndex(-1)}>
-                            <DropdownMenuItem className="cursor-pointer">
+                            <DropdownMenuItem className="cursor-pointer text-white mt-1">
                                 <ImagePlus />
                                 <span>Change avatar</span>
                             </DropdownMenuItem>
                         </DialogTrigger>
-                        <DropdownMenuItem className="cursor-pointer">
+                        <DropdownMenuItem className="cursor-pointer text-white">
                             <LogOut />
                             <span onClick={handleLogout}>Log out</span>
                         </DropdownMenuItem>
