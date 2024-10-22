@@ -76,7 +76,7 @@ function FriendList() {
                                         <CheckCheck size={16} color='white' />
                                     ))}
                                 </span>
-                                {friend.content === "" ? <p className="text-sm font-bold text-green-400">&#x2022; New Connection</p> : <p className={`text-sm text-gray-400 ${friend.statusForUI === "sent" && "ml-1"}`}>{friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}</p>}
+                                {friend.content === "" ? friend.chatStarted ? <i className="text-sm text-gray-400">&#x2022; Chat has been deleted</i> : <p className="text-sm font-bold text-green-400">&#x2022; New Connection</p> : <p className={`text-sm text-gray-400 ${friend.statusForUI === "sent" && "ml-1"}`}>{friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}</p>}
                             </div>
                         </div>
                         <div className="flex flex-col items-end">

@@ -74,20 +74,6 @@ function Register() {
                 duration: 3000,
             })
         }
-
-        if (response.success) {
-            navigate("/chat");
-            toast({
-                title: response.message,
-                duration: 3000,
-            });
-        } else {
-            toast({
-                variant: 'destructive',
-                title: response.message,
-                duration: 3000,
-            })
-        }
     }
 
     useEffect(() => {
@@ -182,7 +168,8 @@ function Register() {
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Confirm Password</Label>
-                        <Input type='password' placeholder="Enter Password" value={confirmPassword} onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value.trim())} />
+                        <Input type='password' placeholder="Enter Password" value={confirmPassword} onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value.trim())} 
+                        onKeyDown={(e) => e.key === 'Enter' && isUniqueUsername && username && password && confirmPassword && password === confirmPassword && handleSubmit(e)}/>
                     </div>
                     <div className='pt-2'>
                         <Button className={`${isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>

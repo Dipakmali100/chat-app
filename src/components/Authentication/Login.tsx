@@ -52,7 +52,8 @@ function Login() {
                     </div>
                     <div className="space-y-1">
                         <Label htmlFor="password">Password</Label>
-                        <Input id="password" type='password' placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value.trim())} />
+                        <Input id="password" type='password' placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value.trim())} 
+                        onKeyDown={(e) => e.key === 'Enter' && username && password && handleLogin(e)}/>
                     </div>
                     <div className='pt-2'>
                         <Button className={`${!username || !password ? 'cursor-not-allowed brightness-50' : ''}`} onClick={!username || !password ? ()=>{} : handleLogin}>Login Now</Button>

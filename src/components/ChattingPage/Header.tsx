@@ -16,6 +16,7 @@ import { Button } from "../ui/button";
 import { people } from "../../constants/HERO_PEOPLE";
 import { useState } from "react";
 import { changeAvatar } from "../../services/operations/AuthenticationAPI";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 function Header() {
     const { user }: any = useAuth();
@@ -66,7 +67,10 @@ function Header() {
             <Dialog>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <img src={user?.imgUrl} alt="Profile" className="h-10 w-10 rounded-full hover:brightness-50 cursor-pointer" />
+                        <Avatar className="h-10 w-10 hover:brightness-50 cursor-pointer">
+                            <AvatarImage src={user?.imgUrl} />
+                            <AvatarFallback>{user?.username[0]}</AvatarFallback>
+                        </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-auto bg-black border-gray-700">
                         <div className="flex justify-center font-bold text-lg font-username py-1 text-white border-b-2 border-gray-700">{user?.username}</div>
@@ -78,9 +82,9 @@ function Header() {
                                 <span>Change avatar</span>
                             </DropdownMenuItem>
                         </DialogTrigger>
-                        <DropdownMenuItem className="cursor-pointer text-white">
+                        <DropdownMenuItem className="cursor-pointer text-white" onClick={handleLogout}>
                             <LogOut />
-                            <span onClick={handleLogout}>Log out</span>
+                            <span>Log out</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

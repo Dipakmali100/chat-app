@@ -11,13 +11,15 @@ export const AuthenticationApi = {
 // Connection Routes
 export const ConnectionApi = {
     SEARCH_USER: `${BASE_URL}/connection/search-user`,
-    CONNECT: `${BASE_URL}/connection/connect`
+    CONNECT: `${BASE_URL}/connection/connect`,
+    DISCONNECT: `${BASE_URL}/connection/disconnect`,
 }
 
 // Chat Routes
 export const ChatApi = {
     GET_FRIEND_LIST: `${BASE_URL}/chat/get-friend-list`,
     GET_CHAT: `${BASE_URL}/chat/get-chat`,
-    SEND_MESSAGE: `${BASE_URL}/chat/send-message`
+    SEND_MESSAGE: `${BASE_URL}/chat/send-message`,
+    DELETE_CHAT: `${BASE_URL}/chat/delete-chat`
 }
 

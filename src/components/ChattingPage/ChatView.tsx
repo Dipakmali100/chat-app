@@ -6,15 +6,31 @@ import { setActiveUser } from '../../redux/slice/activeUserSlice';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
-import { getChat, sendMessage } from '../../services/operations/ChatAPI';
+import { deleteChat, getChat, sendMessage } from '../../services/operations/ChatAPI';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
 import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { Checkbox } from '../ui/checkbox';
+import { toast } from '../../hooks/use-toast';
+import { disconnectUser } from '../../services/operations/ConnectionAPI';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl } = useSelector((state: any) => state.activeUser);
     const { refreshChat } = useSelector((state: any) => state.event);
     const [chat, setChat] = useState<any>([]);
+    const [alertType, setAlertType] = useState("");
+    const [deleteForBoth, setDeleteForBoth] = useState(false);
     const [message, setMessage] = useState("");
     const { user }: any = useAuth();
     const socket = useSocket();
@@ -37,14 +53,54 @@ function ChatView({ activeUsers }: any) {
         const formattedTime = `${hours % 12 || 12}:${minutes < 10 ? "0" : ""}${minutes} ${amOrPm}`;
         setChat([...chat, { id: Date.now(), senderId: user?.userId, receiverId: friendId, content: message, status: "going", createdAt: Date.now(), statusForUI: "sent", time: formattedTime, date: date.toDateString() }]);
 
-        const response = await sendMessage(friendId, message);
+        const currentMessage = message;
+        setMessage("");
+        const response = await sendMessage(friendId, currentMessage);
         if (response.success) {
             await fetchData();
-            setMessage("");
             dispatch(setRefreshFriendList(Math.random()));
-            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, content: message });
+            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, content: currentMessage });
         } else {
             alert(response.message);
+        }
+    }
+
+    async function handleDeleteChat() {
+        const response = await deleteChat(friendId);
+        if (response.success) {
+            await fetchData();
+            dispatch(setRefreshFriendList(Math.random()));
+            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId });
+            toast({
+                title: "Chat Deleted Successfully",
+                duration: 3000,
+            })
+        } else {
+            toast({
+                title: response.message,
+                variant: "destructive",
+                duration: 3000,
+            })
+        }
+    }
+
+    async function handleDisconnect() {
+        const response = await disconnectUser(friendId, deleteForBoth);
+        setDeleteForBoth(false);
+        if (response.success) {
+            dispatch(setRefreshFriendList(Math.random()));
+            dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }));
+            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId });
+            toast({
+                title: "Disconnected Successfully",
+                duration: 3000,
+            })
+        } else {
+            toast({
+                title: response.message,
+                variant: "destructive",
+                duration: 3000,
+            })
         }
     }
 
@@ -152,21 +208,65 @@ function ChatView({ activeUsers }: any) {
                 </div>
 
                 <div className='mr-2 cursor-pointer hover:rounded-full hover:bg-gray-800'>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <EllipsisVertical className='m-2' />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-auto bg-black border-gray-700">
-                            <DropdownMenuItem className="cursor-pointer text-white mt-1">
-                                <Trash2 />
-                                <span>Delete Chat</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-white">
-                                <UserRoundX />
-                                <span>Disconnect</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <EllipsisVertical className='m-2' />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-auto bg-black border-gray-700">
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="cursor-pointer text-white mt-1" onClick={() => setAlertType("deleteChat")}>
+                                        <Trash2 />
+                                        <span>Delete Chat</span>
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={() => setAlertType("disconnect")}>
+                                        <UserRoundX />
+                                        <span>Disconnect</span>
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        {
+                            alertType === "deleteChat" ? (
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete Chat with {username}?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Are you sure you want to delete this chat? This action will permanently remove the chat for both parties.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDeleteChat}>Delete Chat</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            ) : (
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Disconnect from {username}?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Are you sure you want to disconnect? You can always reconnect later.
+                                        </AlertDialogDescription>
+                                        <div className="flex justify-center sm:justify-start items-center space-x-2">
+                                            <Checkbox id="terms" checked={deleteForBoth} onClick={() => setDeleteForBoth(!deleteForBoth)} />
+                                            <label
+                                                htmlFor="terms"
+                                                className="text-sm font-medium cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            >
+                                                Also delete this chat for both parties
+                                            </label>
+                                        </div>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel onClick={() => setDeleteForBoth(false)}>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDisconnect}>Disconnect</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            )
+                        }
+                    </AlertDialog>
                 </div>
             </div>
 
