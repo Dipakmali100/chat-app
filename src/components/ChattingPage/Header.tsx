@@ -13,7 +13,7 @@ import {
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
 import { Button } from "../ui/button";
-import { people } from "../../constants/HERO_PEOPLE";
+import { profileImages } from "../../constants/PROFILE_IMAGES";
 import { useState } from "react";
 import { changeAvatar } from "../../services/operations/AuthenticationAPI";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -37,7 +37,7 @@ function Header() {
         if (carouselSelectedIndex === -1) {
             return;
         }
-        const newAvatar = people[carouselSelectedIndex].image;
+        const newAvatar = profileImages[carouselSelectedIndex];
         const response: any = await changeAvatar(newAvatar);
         if (response.success) {
             user.imgUrl = newAvatar;
@@ -107,10 +107,10 @@ function Header() {
                             className="w-56 sm:w-full max-w-sm"
                         >
                             <CarouselContent>
-                                {people.map((value, index) => (
+                                {profileImages.map((value, index) => (
                                     <CarouselItem key={index} className="basis-1/3">
                                         <div className='flex flex-col items-center justify-center gap-1'>
-                                            <img src={value.image} alt="" className={`w-16 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
+                                            <img src={value} alt="" className={`w-16 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
                                         </div>
                                     </CarouselItem>
                                 ))}

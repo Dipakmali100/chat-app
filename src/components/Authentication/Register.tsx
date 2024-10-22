@@ -11,7 +11,7 @@ import { Card, CardContent } from '../ui/card';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { people } from '../../constants/HERO_PEOPLE';
+import { profileImages } from "../../constants/PROFILE_IMAGES";
 import { useEffect, useState } from 'react';
 import {
     Carousel,
@@ -50,7 +50,7 @@ function Register() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const response = await registerApi(username, password, people[confirmPicIndex].image);
+        const response = await registerApi(username, password, profileImages[confirmPicIndex]);
         if (response.success) {
             const response: any = await loginApi(username, password);
             if (response.success) {
@@ -102,7 +102,7 @@ function Register() {
                     <div className='flex flex-col items-center justify-center gap-1'>
                         <Dialog>
                             <DialogTrigger asChild>
-                                <img src={people[confirmPicIndex].image} alt="Default Profile" className='w-16 rounded-full cursor-pointer hover:brightness-75' onClick={() => setCarouselSelectedIndex(confirmPicIndex)} />
+                                <img src={profileImages[confirmPicIndex]} alt="Default Profile" className='w-16 rounded-full cursor-pointer hover:brightness-75' onClick={() => setCarouselSelectedIndex(confirmPicIndex)} />
                             </DialogTrigger>
                             <DialogTrigger asChild>
                                 <Label htmlFor="text" className="cursor-pointer" onClick={() => setCarouselSelectedIndex(confirmPicIndex)}>Change Profile</Label>
@@ -126,10 +126,10 @@ function Register() {
                                         className="w-56 sm:w-full max-w-sm"
                                     >
                                         <CarouselContent>
-                                            {people.map((value, index) => (
+                                            {profileImages.map((value, index) => (
                                                 <CarouselItem key={index} className="basis-1/3">
                                                     <div className='flex flex-col items-center justify-center gap-1'>
-                                                        <img src={value.image} alt="" className={`w-16 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
+                                                        <img src={value} alt="" className={`w-16 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
                                                     </div>
                                                 </CarouselItem>
                                             ))}
