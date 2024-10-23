@@ -67,7 +67,7 @@ function Header() {
             <Dialog>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Avatar className="h-10 w-10 hover:brightness-50 cursor-pointer">
+                        <Avatar className="h-10 w-10 hover:brightness-50 bg-gray-200 cursor-pointer">
                             <AvatarImage src={user?.imgUrl} />
                             <AvatarFallback>{user?.username[0]}</AvatarFallback>
                         </Avatar>
@@ -110,7 +110,7 @@ function Header() {
                                 {profileImages.map((value, index) => (
                                     <CarouselItem key={index} className="basis-1/3">
                                         <div className='flex flex-col items-center justify-center gap-1'>
-                                            <img src={value} alt="" className={`w-16 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
+                                            <img src={value} alt="" className={`w-16 bg-gray-200 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
                                         </div>
                                     </CarouselItem>
                                 ))}

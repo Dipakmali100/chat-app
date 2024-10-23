@@ -102,7 +102,7 @@ function Register() {
                     <div className='flex flex-col items-center justify-center gap-1'>
                         <Dialog>
                             <DialogTrigger asChild>
-                                <img src={profileImages[confirmPicIndex]} alt="Default Profile" className='w-16 rounded-full cursor-pointer hover:brightness-75' onClick={() => setCarouselSelectedIndex(confirmPicIndex)} />
+                                <img src={profileImages[confirmPicIndex]} alt="Default Profile" className='w-16 rounded-full bg-gray-200 cursor-pointer hover:brightness-75' onClick={() => setCarouselSelectedIndex(confirmPicIndex)} />
                             </DialogTrigger>
                             <DialogTrigger asChild>
                                 <Label htmlFor="text" className="cursor-pointer" onClick={() => setCarouselSelectedIndex(confirmPicIndex)}>Change Profile</Label>
@@ -129,7 +129,7 @@ function Register() {
                                             {profileImages.map((value, index) => (
                                                 <CarouselItem key={index} className="basis-1/3">
                                                     <div className='flex flex-col items-center justify-center gap-1'>
-                                                        <img src={value} alt="" className={`w-16 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
+                                                        <img src={value} alt="" className={`w-16 rounded-full bg-gray-200 cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
                                                     </div>
                                                 </CarouselItem>
                                             ))}

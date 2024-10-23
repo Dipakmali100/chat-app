@@ -24,6 +24,7 @@ import {
 import { Checkbox } from '../ui/checkbox';
 import { toast } from '../../hooks/use-toast';
 import { disconnectUser } from '../../services/operations/ConnectionAPI';
+import ChatLoader from "../../assets/ChatLoader.svg";
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl } = useSelector((state: any) => state.activeUser);
@@ -32,13 +33,16 @@ function ChatView({ activeUsers }: any) {
     const [alertType, setAlertType] = useState("");
     const [deleteForBoth, setDeleteForBoth] = useState(false);
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
     const chatEndRef = useRef<HTMLDivElement>(null);
     async function fetchData() {
+        setLoading(true);
         const response = await getChat(friendId);
         setChat(response.data);
+        setLoading(false);
         console.log("Chat got refreshed");
     }
     async function handleMessageSubmit(e: any) {
@@ -105,11 +109,10 @@ function ChatView({ activeUsers }: any) {
     }
 
     useEffect(() => {
-        // Scroll to the bottom of the chat
         if (chatEndRef.current) {
             chatEndRef.current.scrollIntoView({ behavior: 'instant' });
         }
-    }, [chat]); // Dependency on chat to scroll when messages change
+    }, [chat]);
 
     useEffect(() => {
         if (!socket) {
@@ -185,7 +188,7 @@ function ChatView({ activeUsers }: any) {
 
     return (
         <div className="flex-grow flex flex-col h-full">
-            <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-700 md:px-4">
+            <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-700 md:px-4">
                 <div className='flex'>
                     <div className="flex items-center">
                         <Button
@@ -196,7 +199,7 @@ function ChatView({ activeUsers }: any) {
                         >
                             <ArrowLeft className="h-6 w-6" />
                         </Button>
-                        <Avatar className="h-10 w-10 mr-3">
+                        <Avatar className="h-10 w-10 mr-3 bg-gray-200">
                             <AvatarImage src={imgUrl} />
                             <AvatarFallback>{username[0]}</AvatarFallback>
                         </Avatar>
@@ -270,49 +273,53 @@ function ChatView({ activeUsers }: any) {
                 </div>
             </div>
 
-            <div className="flex-grow overflow-auto mb-4 px-2 md:px-4">
-                {chat.map((message: any) => (
-                    (message.statusForUI === "received" ? (
-                        <div className="mb-2" key={message.id}>
-                            <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
-                                <p className='text-black break-words'>
-                                    {message.content.split('\n').map((item: string, index: number) => (
-                                        <span key={index}>
-                                            {item}
-                                            <br />
-                                        </span>
-                                    ))}
-                                </p>
-                                <span className="text-xs text-gray-500">{message.time}</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="mb-2 text-right" key={message.id}>
-                            <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
-                                <p className='text-left break-words'>
-                                    {message.content.split('\n').map((item: string, index: number) => (
-                                        <span key={index}>
-                                            {item}
-                                            <br />
-                                        </span>
-                                    ))}
-                                </p>
-                                <div className='flex justify-between py-2 gap-2'>
-                                    <p className="text-xs text-gray-500">{message.time}</p>
-                                    {message.status === "sent" ? (
-                                        <Check size={16} color='grey' />
-                                    ) : message.status === "received" ? (
-                                        <CheckCheck size={16} color='grey' />
-                                    ) : message.status === "seen" ? (
-                                        <CheckCheck size={16} color='white' />
-                                    ) : (
-                                        <Clock3 size={16} color='grey' />
-                                    )}
+            <div className="flex-grow overflow-auto mb-2 px-2 md:px-4">
+                {chat.length === 0 && loading ? (
+                    <img src={ChatLoader} alt="Loader" className='item-center mx-auto w-6' />
+                ) : (
+                    chat.map((message: any) => (
+                        (message.statusForUI === "received" ? (
+                            <div className="mb-2" key={message.id}>
+                                <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
+                                    <p className='text-black break-words'>
+                                        {message.content.split('\n').map((item: string, index: number) => (
+                                            <span key={index}>
+                                                {item}
+                                                <br />
+                                            </span>
+                                        ))}
+                                    </p>
+                                    <span className="text-xs text-gray-500">{message.time}</span>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="mb-2 text-right" key={message.id}>
+                                <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
+                                    <p className='text-left break-words'>
+                                        {message.content.split('\n').map((item: string, index: number) => (
+                                            <span key={index}>
+                                                {item}
+                                                <br />
+                                            </span>
+                                        ))}
+                                    </p>
+                                    <div className='flex justify-between py-2 gap-2'>
+                                        <p className="text-xs text-gray-500">{message.time}</p>
+                                        {message.status === "sent" ? (
+                                            <Check size={16} color='grey' />
+                                        ) : message.status === "received" ? (
+                                            <CheckCheck size={16} color='grey' />
+                                        ) : message.status === "seen" ? (
+                                            <CheckCheck size={16} color='white' />
+                                        ) : (
+                                            <Clock3 size={16} color='grey' />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))
                     ))
-                ))}
+                )}
 
                 {/* This div will help scroll to the bottom */}
                 <div ref={chatEndRef} />

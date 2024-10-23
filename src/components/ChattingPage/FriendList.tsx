@@ -18,7 +18,7 @@ type Friend = {
     createdAt: string;
 }
 
-function FriendList() {
+function FriendList({activeUsers}: any) {
     const { refreshFriendList } = useSelector((state: any) => state.event);
     const [loader, setLoader] = useState(false);
     const [friendList, setFriendList] = useState<Friend[]>([]);
@@ -60,10 +60,15 @@ function FriendList() {
                         className="flex items-center mb-4 border border-gray-700 rounded-lg p-2 hover:bg-gray-900 transition-colors cursor-pointer"
                         onClick={() => dispatch(setActiveUser({ friendId: friend.senderId, username: friend.username, imgUrl: friend.imgUrl }))}
                     >
-                        <Avatar className="h-10 w-10 mr-3">
-                            <AvatarImage src={friend.imgUrl} />
-                            <AvatarFallback>{friend.username[0]}</AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                            {activeUsers[friend.senderId] && <div className={`absolute left-8 top-7 z-50 w-2 h-2 bg-green-500 rounded-full`}>
+                            </div>}
+                            <Avatar className="h-10 w-10 mr-3 bg-gray-200">
+                                <AvatarImage src={friend.imgUrl} />
+                                <AvatarFallback>{friend.username[0]}</AvatarFallback>
+                            </Avatar>
+                        </div>
+
                         <div className="flex-grow">
                             <h3 className="font-semibold">{friend.username}</h3>
                             <div className="flex">

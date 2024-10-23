@@ -12,6 +12,7 @@ import { setRefreshChat, setRefreshFriendList } from '../redux/slice/eventSlice'
 export default function ChattingPage() {
   const { friendId } = useSelector((state: any) => state.activeUser);
   const [activeUsers, setActiveUsers] = useState<any>({});
+  const [isDisconnected, setIsDisconnected] = useState(false);
   const socket = useSocket();
   const dispatch = useDispatch();
   const { user }: any = useAuth();
@@ -19,10 +20,8 @@ export default function ChattingPage() {
 
   useEffect(() => {
     if (!socket || !userId) {
-      console.log("Socket or userId not found");
       return;
     }
-    console.log("Socket and userId found");
 
     // Listen for active users updates
     socket.on('alreadyOnlineUsers', (data) => {
@@ -58,24 +57,31 @@ export default function ChattingPage() {
       dispatch(setRefreshFriendList(Math.random()));
     });
 
+    // Listen for disconnect
+    socket.on('disconnect', () => {
+      setIsDisconnected(true);
+    });
+
     // Clean up on component unmount
     return () => {
       socket.off('alreadyOnlineUsers');
       socket.off('newActiveUser');
       socket.off('removeActiveUser');
       socket.off('newMessage');
+      socket.off('disconnect');
     };
   }, [socket, userId]); // Dependency array to re-run when userId changes
 
   return (
     <div className="flex h-screen bg-black text-white">
+      {isDisconnected && <div className="absolute z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50">Disconnected</div>}
       <div className={`w-full md:w-1/3 flex flex-col ${friendId !== 0 ? 'hidden md:flex' : 'flex'}`}>
         <div className="px-4 pt-4 pb-2">
           <Header />
           <SearchView />
         </div>
         <div className="flex-1 overflow-y-auto px-4">
-          <FriendList />
+          <FriendList activeUsers={activeUsers}/>
         </div>
       </div>
       <div className={`w-full md:w-2/3 py-4 md:border-l md:border-gray-700 ${friendId !== 0 ? 'block' : 'hidden md:block'}`}>
