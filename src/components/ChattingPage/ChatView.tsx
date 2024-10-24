@@ -25,9 +25,11 @@ import { Checkbox } from '../ui/checkbox';
 import { toast } from '../../hooks/use-toast';
 import { disconnectUser } from '../../services/operations/ConnectionAPI';
 import ChatLoader from "../../assets/ChatLoader.svg";
+import formatMessages from '../../utils/formatMessages';
+import VerifiedTick from '../../assets/VerifiedTick.png';
 
 function ChatView({ activeUsers }: any) {
-    const { friendId, username, imgUrl } = useSelector((state: any) => state.activeUser);
+    const { friendId, username, imgUrl, verified } = useSelector((state: any) => state.activeUser);
     const { refreshChat } = useSelector((state: any) => state.event);
     const [chat, setChat] = useState<any>([]);
     const [alertType, setAlertType] = useState("");
@@ -38,10 +40,12 @@ function ChatView({ activeUsers }: any) {
     const socket = useSocket();
     const dispatch = useDispatch();
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
     async function fetchData() {
         setLoading(true);
         const response = await getChat(friendId);
-        setChat(response.data);
+        const formattedChat = await formatMessages(response.data);
+        setChat(formattedChat);
         setLoading(false);
         console.log("Chat got refreshed");
     }
@@ -50,12 +54,31 @@ function ChatView({ activeUsers }: any) {
         if (!message) {
             return;
         }
+        if(inputRef.current) {
+            inputRef.current.focus();
+        }
         const date = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000));
         const hours = date.getUTCHours();
         const minutes = date.getUTCMinutes();
         const amOrPm = hours >= 12 ? "PM" : "AM";
         const formattedTime = `${hours % 12 || 12}:${minutes < 10 ? "0" : ""}${minutes} ${amOrPm}`;
-        setChat([...chat, { id: Date.now(), senderId: user?.userId, receiverId: friendId, content: message, status: "going", createdAt: Date.now(), statusForUI: "sent", time: formattedTime, date: date.toDateString() }]);
+        const onGoingMessageObject = {
+            id: Date.now(),
+            senderId: user?.userId,
+            receiverId: friendId,
+            content: message,
+            status: "going",
+            createdAt: Date.now(),
+            statusForUI: "sent",
+            time: formattedTime,
+            date: "Today"
+        };
+
+        // Update chat state correctly by pushing the new message to the array
+        setChat((prevChat: any) => ({
+            ...prevChat,
+            Today: [...(prevChat.Today || []), onGoingMessageObject] // Ensure 'Today' is initialized as an array
+        }));
 
         const currentMessage = message;
         setMessage("");
@@ -195,7 +218,7 @@ function ChatView({ activeUsers }: any) {
                             variant="ghost"
                             size="icon"
                             className="mr-2 md:hidden"
-                            onClick={() => dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }))}
+                            onClick={() => dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "", verified: false }))}
                         >
                             <ArrowLeft className="h-6 w-6" />
                         </Button>
@@ -205,7 +228,12 @@ function ChatView({ activeUsers }: any) {
                         </Avatar>
                     </div>
                     <div>
-                        <h2 className="font-semibold">{username}</h2>
+                        <div className='flex gap-1'>
+                            <h2 className="font-semibold">{username}</h2>
+                            {verified && (
+                                <img src={VerifiedTick} alt="Verified" className='w-4 h-4 mt-1' />
+                            )}
+                        </div>
                         <p className={`text-sm ${activeUsers[friendId] ? "text-green-500 font-bold" : "text-gray-400"}`}>{activeUsers[friendId] ? "Online" : "Offline"}</p>
                     </div>
                 </div>
@@ -277,47 +305,56 @@ function ChatView({ activeUsers }: any) {
                 {chat.length === 0 && loading ? (
                     <img src={ChatLoader} alt="Loader" className='item-center mx-auto w-6' />
                 ) : (
-                    chat.map((message: any) => (
-                        (message.statusForUI === "received" ? (
-                            <div className="mb-2" key={message.id}>
-                                <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
-                                    <p className='text-black break-words'>
-                                        {message.content.split('\n').map((item: string, index: number) => (
-                                            <span key={index}>
-                                                {item}
-                                                <br />
-                                            </span>
-                                        ))}
-                                    </p>
-                                    <span className="text-xs text-gray-500">{message.time}</span>
-                                </div>
+                    Object.keys(chat).map((date, index) => (
+                        <div key={index}>
+                            <div className='sticky top-0 text-xs text-gray-400 flex justify-center mb-3 '>
+                                <p className='bg-gray-900 py-1 px-2 rounded-sm'>{date}</p>
                             </div>
-                        ) : (
-                            <div className="mb-2 text-right" key={message.id}>
-                                <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
-                                    <p className='text-left break-words'>
-                                        {message.content.split('\n').map((item: string, index: number) => (
-                                            <span key={index}>
-                                                {item}
-                                                <br />
-                                            </span>
-                                        ))}
-                                    </p>
-                                    <div className='flex justify-between py-2 gap-2'>
-                                        <p className="text-xs text-gray-500">{message.time}</p>
-                                        {message.status === "sent" ? (
-                                            <Check size={16} color='grey' />
-                                        ) : message.status === "received" ? (
-                                            <CheckCheck size={16} color='grey' />
-                                        ) : message.status === "seen" ? (
-                                            <CheckCheck size={16} color='white' />
-                                        ) : (
-                                            <Clock3 size={16} color='grey' />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))
+                            {
+                                chat[date].map((message: any) => (
+                                    (message.statusForUI === "received" ? (
+                                        <div className="mb-2" key={message.id}>
+                                            <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
+                                                <p className='text-black break-words'>
+                                                    {message.content.split('\n').map((item: string, index: number) => (
+                                                        <span key={index}>
+                                                            {item}
+                                                            <br />
+                                                        </span>
+                                                    ))}
+                                                </p>
+                                                <span className="text-xs text-gray-500">{message.time}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-2 text-right" key={message.id}>
+                                            <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
+                                                <p className='text-left break-words'>
+                                                    {message.content.split('\n').map((item: string, index: number) => (
+                                                        <span key={index}>
+                                                            {item}
+                                                            <br />
+                                                        </span>
+                                                    ))}
+                                                </p>
+                                                <div className='flex justify-between py-2 gap-2'>
+                                                    <p className="text-xs text-gray-500">{message.time}</p>
+                                                    {message.status === "sent" ? (
+                                                        <Check size={16} color='grey' />
+                                                    ) : message.status === "received" ? (
+                                                        <CheckCheck size={16} color='grey' />
+                                                    ) : message.status === "seen" ? (
+                                                        <CheckCheck size={16} color='white' />
+                                                    ) : (
+                                                        <Clock3 size={16} color='grey' />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ))
+                            }
+                        </div>
                     ))
                 )}
 
@@ -328,6 +365,7 @@ function ChatView({ activeUsers }: any) {
             <form onSubmit={handleMessageSubmit}>
                 <div className="flex px-2 md:px-4">
                     <Textarea
+                        ref={inputRef}
                         className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500 h-8 max-h-20"
                         placeholder="Type Message Here..."
                         value={message}

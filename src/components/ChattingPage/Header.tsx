@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../hooks/use-toast";
 import { motion } from "framer-motion";
-import { ImagePlus, MessageCircleMore } from "lucide-react";
+import { BadgeCheck, ImagePlus, MessageCircleMore } from "lucide-react";
 import { LogOut } from "lucide-react"
 import {
     DropdownMenu,
@@ -17,6 +17,7 @@ import { profileImages } from "../../constants/PROFILE_IMAGES";
 import { useState } from "react";
 import { changeAvatar } from "../../services/operations/AuthenticationAPI";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import VerifiedTick from "../../assets/VerifiedTick.png";
 
 function Header() {
     const { user }: any = useAuth();
@@ -73,7 +74,12 @@ function Header() {
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-auto bg-black border-gray-700">
-                        <div className="flex justify-center font-bold text-lg font-username py-1 text-white border-b-2 border-gray-700">{user?.username}</div>
+                        <div className="flex justify-center gap-1 font-bold text-lg font-username py-1 text-white border-b-2 border-gray-700">
+                            {user?.username}
+                            {user?.verified && (
+                                <img src={VerifiedTick} alt="Verified" className='w-5 h-5 mt-[2px]' />
+                            )}
+                        </div>
                         {/* <DropdownMenuSeparator className="text-black"/> */}
 
                         <DialogTrigger asChild onClick={() => setCarouselSelectedIndex(-1)}>
@@ -82,6 +88,12 @@ function Header() {
                                 <span>Change avatar</span>
                             </DropdownMenuItem>
                         </DialogTrigger>
+                        {!user?.verified && (
+                            <DropdownMenuItem className="cursor-pointer text-white" onClick={() => {}}>
+                                <BadgeCheck />
+                                <span>Get verified</span>
+                            </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem className="cursor-pointer text-white" onClick={handleLogout}>
                             <LogOut />
                             <span>Log out</span>

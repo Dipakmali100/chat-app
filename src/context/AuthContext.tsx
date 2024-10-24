@@ -10,6 +10,7 @@ interface User {
     userId: number;
     username: string;
     imgUrl: string;
+    verified: boolean;
     token: string;
 }
 
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         userId: response.data.data.userId,
                         username: response.data.data.username,
                         imgUrl: response.data.data.imgUrl,
+                        verified: response.data.data.verified,
                         token
                     });
                 } else {
@@ -81,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = (userData: User) => {
         setUser(userData);
         setIsAuthenticated(true);
-        dispatch(setActiveUser({ friendId: 0, username: "" }));
+        dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "", verified: false }));
         localStorage.setItem('token', "Bearer " + userData.token);
     };
 
@@ -94,7 +96,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const value = {
         user,
         isAuthenticated,
-        setUser,
         login,
         logout
     }

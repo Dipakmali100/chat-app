@@ -12,6 +12,7 @@ import { useToast } from '../../hooks/use-toast';
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
     const authContext = useAuth();
@@ -24,9 +25,10 @@ function Login() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
         const response: any = await loginApi(username, password);
         if (response.success) {
-            login({ userId: response.data.userId, username: username, imgUrl: response.data.imgUrl, token: response.data.token });
+            login({ userId: response.data.userId, username: username, imgUrl: response.data.imgUrl, token: response.data.token, verified: response.data.verified });
             navigate("/chat");
             toast({
                 title: response.message,
@@ -39,6 +41,7 @@ function Login() {
                 duration: 3000,
             })
         }
+        setLoading(false);
     }
     return (
         <div>
@@ -56,7 +59,7 @@ function Login() {
                         onKeyDown={(e) => e.key === 'Enter' && username && password && handleLogin(e)}/>
                     </div>
                     <div className='pt-2'>
-                        <Button className={`${!username || !password ? 'cursor-not-allowed brightness-50' : ''}`} onClick={!username || !password ? ()=>{} : handleLogin}>Login Now</Button>
+                        <Button className={`${!username || !password || loading ? 'cursor-not-allowed brightness-50' : ''}`} onClick={!username || !password || loading ? ()=>{} : handleLogin}>Login Now</Button>
                     </div>
                 </CardContent>
             </Card>

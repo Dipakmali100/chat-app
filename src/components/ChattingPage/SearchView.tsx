@@ -8,11 +8,13 @@ import { Check, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
 import { toast } from '../../hooks/use-toast';
+import VerifiedTick from '../../assets/VerifiedTick.png';
 
 interface User {
     id: number;
     username: string;
     imgUrl: string;
+    verified: boolean;
     isConnected: boolean;
 }
 
@@ -67,7 +69,7 @@ function SearchView() {
         setSearchTerm("");
     };
 
-    const handleConnectUser = async (userId: number,username: string) => {
+    const handleConnectUser = async (userId: number, username: string) => {
         await connectUser(userId);
         toast({
             title: "Successfully Connected to " + username,
@@ -89,17 +91,17 @@ function SearchView() {
                 }}
             />
             {searchTerm && (
-              <div
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                onClick={handleClearSearch}
-              >
-                <X className="h-4 w-4 hover:text-white" />
-              </div>
+                <div
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                    onClick={handleClearSearch}
+                >
+                    <X className="h-4 w-4 hover:text-white" />
+                </div>
             )}
 
             {/* Search results */}
             {searchTerm && (
-                <div className="absolute z-10 w-full border-2 border-slate-700 rounded-lg gap-2 px-2 bg-gray-800">
+                <div className="absolute z-50 w-full border-2 border-slate-700 rounded-lg gap-2 px-2 bg-[#030303]">
                     {loading ? (
                         <div className="flex items-center space-x-4 py-2">
                             <Skeleton className="h-10 w-10 rounded-full" />
@@ -120,16 +122,19 @@ function SearchView() {
                                             alt={user.username}
                                             className="w-10 h-10 rounded-full mr-2"
                                         />
-                                        <div>
+                                        <div className='flex gap-1'>
                                             <p className="font-bold">{user.username}</p>
+                                            {user.verified && (
+                                                <img src={VerifiedTick} alt="Verified" className='w-4 h-4 mt-1' />
+                                            )}
                                         </div>
                                     </div>
                                     <div>
-                                        {user.isConnected ? <Check className="text-green-500 mr-2" />:<Button
+                                        {user.isConnected ? <Check className="text-green-500 mr-2" /> : <Button
                                             variant="outline"
                                             size="sm"
                                             className="text-black"
-                                            onClick={() => handleConnectUser(user.id,user.username)}>
+                                            onClick={() => handleConnectUser(user.id, user.username)}>
                                             Connect
                                         </Button>}
                                     </div>

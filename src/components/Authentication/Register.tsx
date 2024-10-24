@@ -35,6 +35,7 @@ function Register() {
     const [carouselSelectedIndex, setCarouselSelectedIndex] = useState(confirmPicIndex);
     const [loading, setLoading] = useState(true);
     const [isUniqueUsername, setIsUniqueUsername] = useState(false);
+    const [submitLoading, setSubmitLoading] = useState(false);
     const debouncingSearchValue = useDebouncedValue(username, 500);
     const { toast } = useToast();
     const navigate = useNavigate();
@@ -49,12 +50,12 @@ function Register() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        setSubmitLoading(true);
         const response = await registerApi(username, password, profileImages[confirmPicIndex]);
         if (response.success) {
             const response: any = await loginApi(username, password);
             if (response.success) {
-                login({ userId: response.data.userId, username: username, imgUrl: response.data.imgUrl, token: response.data.token });
+                login({ userId: response.data.userId, username: username, imgUrl: response.data.imgUrl, token: response.data.token, verified: response.data.verified });
                 navigate("/chat");
                 toast({
                     title: response.message,
@@ -74,6 +75,7 @@ function Register() {
                 duration: 3000,
             })
         }
+        setSubmitLoading(false);
     }
 
     useEffect(() => {
@@ -172,7 +174,7 @@ function Register() {
                         onKeyDown={(e) => e.key === 'Enter' && isUniqueUsername && username && password && confirmPassword && password === confirmPassword && handleSubmit(e)}/>
                     </div>
                     <div className='pt-2'>
-                        <Button className={`${isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>
+                        <Button className={`${!submitLoading && isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? "" : "brightness-50 cursor-not-allowed"}`} onClick={!submitLoading &&isUniqueUsername && username && password && confirmPassword && password === confirmPassword ? handleSubmit : () => { }}>Register Now</Button>
                     </div>
                 </CardContent>
             </Card>

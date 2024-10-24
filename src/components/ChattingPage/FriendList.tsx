@@ -6,6 +6,7 @@ import { setActiveUser } from "../../redux/slice/activeUserSlice";
 import { Check, CheckCheck } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
+import VerifiedTick from "../../assets/VerifiedTick.png";
 
 type Friend = {
     senderId: number;
@@ -18,7 +19,7 @@ type Friend = {
     createdAt: string;
 }
 
-function FriendList({activeUsers}: any) {
+function FriendList({ activeUsers }: any) {
     const { refreshFriendList } = useSelector((state: any) => state.event);
     const [loader, setLoader] = useState(false);
     const [friendList, setFriendList] = useState<Friend[]>([]);
@@ -41,8 +42,8 @@ function FriendList({activeUsers}: any) {
                 {friendList.length === 0 ? (
                     loader ? (
                         // run the skeleton 10 time
-                        Array.from({ length: 5 }).map(() => (
-                            <div className="flex items-center mb-4 border border-gray-700 rounded-lg p-2 hover:bg-gray-900 transition-colors cursor-pointer">
+                        Array.from({ length: 5 }).map((_, index) => (
+                            <div key={index} className="flex items-center mb-4 border border-gray-700 rounded-lg p-2 hover:bg-gray-900 transition-colors cursor-pointer">
                                 <Skeleton className="h-10 w-10 rounded-full" />
                                 <div className="space-y-2 ml-2">
                                     <Skeleton className="h-4 w-[100px] md:w-[200px]" />
@@ -54,14 +55,14 @@ function FriendList({activeUsers}: any) {
                         <Label className="text-xl">No Friends Yet</Label><br />
                         <Label className="text-md text-gray-400">Start searching to connect with others!</Label>
                     </div>
-                ) : (friendList.map((friend: any) => (
+                ) : (friendList.map((friend: any, index: number) => (
                     <div
-                        key={friend.senderId}
+                        key={index}
                         className="flex items-center mb-4 border border-gray-700 rounded-lg p-2 hover:bg-gray-900 transition-colors cursor-pointer"
-                        onClick={() => dispatch(setActiveUser({ friendId: friend.senderId, username: friend.username, imgUrl: friend.imgUrl }))}
+                        onClick={() => dispatch(setActiveUser({ friendId: friend.senderId, username: friend.username, imgUrl: friend.imgUrl, verified: friend.verified }))}
                     >
                         <div className="relative">
-                            {activeUsers[friend.senderId] && <div className={`absolute left-8 top-7 z-50 w-2 h-2 bg-green-500 rounded-full`}>
+                            {activeUsers[friend.senderId] && <div className={`absolute left-8 top-7 z-10 w-2 h-2 bg-green-500 rounded-full`}>
                             </div>}
                             <Avatar className="h-10 w-10 mr-3 bg-gray-200">
                                 <AvatarImage src={friend.imgUrl} />
@@ -70,7 +71,12 @@ function FriendList({activeUsers}: any) {
                         </div>
 
                         <div className="flex-grow">
-                            <h3 className="font-semibold">{friend.username}</h3>
+                            <div className="flex gap-1">
+                                <h3 className="font-semibold">{friend.username}</h3>
+                                {friend.verified && (
+                                    <img src={VerifiedTick} alt="Verified" className='w-4 h-4 mt-1' />
+                                )}
+                            </div>
                             <div className="flex">
                                 <span className="pt-1">
                                     {friend.statusForUI === "sent" && (friend.status === "sent" ? (
