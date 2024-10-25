@@ -18,6 +18,8 @@ import { useState } from "react";
 import { changeAvatar } from "../../services/operations/AuthenticationAPI";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import VerifiedTick from "../../assets/VerifiedTick.png";
+import { Label } from "../ui/label";
+import razorpayPaymentHandler from "../../utils/razorpayPaymentHandler";
 
 function Header() {
     const { user }: any = useAuth();
@@ -25,6 +27,7 @@ function Header() {
     const navigate = useNavigate();
     const { toast } = useToast();
     const [carouselSelectedIndex, setCarouselSelectedIndex] = useState(-1);
+    const [dialogType, setDialogType] = useState("changeAvatar");
 
     const handleLogout = () => {
         authContext?.logout();
@@ -51,6 +54,10 @@ function Header() {
                 title: response.message
             })
         }
+    }
+
+    const handlePayment = async () => {
+        await razorpayPaymentHandler(user);
     }
 
     return (
@@ -82,17 +89,19 @@ function Header() {
                         </div>
                         {/* <DropdownMenuSeparator className="text-black"/> */}
 
-                        <DialogTrigger asChild onClick={() => setCarouselSelectedIndex(-1)}>
+                        <DialogTrigger asChild onClick={() => { setCarouselSelectedIndex(-1); setDialogType("changeAvatar") }}>
                             <DropdownMenuItem className="cursor-pointer text-white mt-1">
                                 <ImagePlus />
                                 <span>Change avatar</span>
                             </DropdownMenuItem>
                         </DialogTrigger>
                         {!user?.verified && (
-                            <DropdownMenuItem className="cursor-pointer text-white" onClick={() => {}}>
-                                <BadgeCheck />
-                                <span>Get verified</span>
-                            </DropdownMenuItem>
+                            <DialogTrigger asChild onClick={() => { setDialogType("getVerified") }}>
+                                <DropdownMenuItem className="cursor-pointer text-white" >
+                                    <BadgeCheck />
+                                    <span>Get verified</span>
+                                </DropdownMenuItem>
+                            </DialogTrigger>
                         )}
                         <DropdownMenuItem className="cursor-pointer text-white" onClick={handleLogout}>
                             <LogOut />
@@ -100,41 +109,71 @@ function Header() {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <DialogContent className="w-11/12 rounded-sm sm:max-w-[500px]">
-                    <div className='flex flex-col items-center gap-1'>
-                        <div>
-                            <DialogTitle>Change Profile</DialogTitle>
+                {dialogType === "changeAvatar" ? (
+                    <DialogContent className="w-11/12 rounded-sm sm:max-w-[500px]">
+                        <div className='flex flex-col items-center gap-1'>
+                            <div>
+                                <DialogTitle>Change Profile</DialogTitle>
+                            </div>
+                            <div>
+                                <DialogDescription>
+                                    Select a profile picture
+                                </DialogDescription>
+                            </div>
                         </div>
-                        <div>
-                            <DialogDescription>
-                                Select a profile picture
-                            </DialogDescription>
+                        <div className='flex flex-col items-center justify-center'>
+                            <Carousel
+                                opts={{
+                                    align: "start",
+                                }}
+                                className="w-56 sm:w-full max-w-sm"
+                            >
+                                <CarouselContent>
+                                    {profileImages.map((value, index) => (
+                                        <CarouselItem key={index} className="basis-1/3">
+                                            <div className='flex flex-col items-center justify-center gap-1'>
+                                                <img src={value} alt="" className={`w-16 bg-gray-200 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious />
+                                <CarouselNext />
+                            </Carousel>
                         </div>
-                    </div>
-                    <div className='flex flex-col items-center justify-center'>
-                        <Carousel
-                            opts={{
-                                align: "start",
-                            }}
-                            className="w-56 sm:w-full max-w-sm"
-                        >
-                            <CarouselContent>
-                                {profileImages.map((value, index) => (
-                                    <CarouselItem key={index} className="basis-1/3">
-                                        <div className='flex flex-col items-center justify-center gap-1'>
-                                            <img src={value} alt="" className={`w-16 bg-gray-200 rounded-full cursor-pointer hover:brightness-75 ${carouselSelectedIndex === index ? 'border-4 border-black' : ''}`} onClick={() => setCarouselSelectedIndex(index)} />
-                                        </div>
-                                    </CarouselItem>
-                                ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                        </Carousel>
-                    </div>
-                    <DialogClose>
-                        <Button type="submit" className={`${carouselSelectedIndex === -1 ? 'brightness-50 cursor-not-allowed' : ''}`} onClick={handleChangeAvatar}>Save changes</Button>
-                    </DialogClose>
-                </DialogContent>
+                        <DialogClose>
+                            <Button type="submit" className={`${carouselSelectedIndex === -1 ? 'brightness-50 cursor-not-allowed' : ''}`} onClick={handleChangeAvatar}>Save changes</Button>
+                        </DialogClose>
+                    </DialogContent>
+                ) : (
+                    <DialogContent className="w-11/12 rounded-sm sm:max-w-[500px]">
+                        <div className='flex flex-col items-center gap-1'>
+                            <div>
+                                <Label className="text-lg">Get Verified</Label>
+                            </div>
+                            <div>
+                                <DialogDescription className="font-semibold">
+                                    Pay &#8377;10 and get verified for lifetime
+                                </DialogDescription>
+                                <div className="flex justify-center gap-1 pt-3 mr-1">
+                                    <Avatar className="h-10 w-10 hover:brightness-50 bg-gray-200 cursor-pointer">
+                                        <AvatarImage src={user?.imgUrl} />
+                                        <AvatarFallback>{user?.username[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="text-lg font-semibold mt-2 ml-1 font-username">{user?.username}</p>
+                                    </div>
+                                    <div className="mt-2">
+                                        <img src={VerifiedTick} alt="Verified" className='w-4 h-4 mt-1' />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <DialogClose>
+                            <Button type="submit" className="w-full" onClick={() => {handlePayment()}}>Pay &#8377;10</Button>
+                        </DialogClose>
+                    </DialogContent>
+                )}
             </Dialog>
         </div>
     )

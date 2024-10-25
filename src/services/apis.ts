@@ -23,3 +23,9 @@ export const ChatApi = {
     DELETE_CHAT: `${BASE_URL}/chat/delete-chat`
 }
 
+// Payment Routes
+export const PaymentApi = {
+    CREATE_ORDER: `${BASE_URL}/payment/create-order`,
+    VERIFY_PAYMENT: `${BASE_URL}/payment/verify-payment`,
+}
+

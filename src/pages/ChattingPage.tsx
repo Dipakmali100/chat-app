@@ -80,7 +80,7 @@ export default function ChattingPage() {
   return (
     <div className="flex h-screen bg-black text-white">
       {isDisconnected && (
-        <div className="absolute z-50 inset-0 flex items-center justify-center bg-black bg-opacity-80">
+        <div className="absolute z-50 inset-0 max-sm:px-3 flex items-center justify-center bg-black bg-opacity-80">
           <div className='bg-red-600 flex w-full md:w-1/2 lg:w-1/3 flex-col items-center rounded-md p-4'>
             <div className='px-4 py-2 text-black text-xl font-bold flex text-center'>
               {/* <MessageCircleWarning />  */}
