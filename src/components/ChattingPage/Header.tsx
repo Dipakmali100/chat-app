@@ -56,10 +56,6 @@ function Header() {
         }
     }
 
-    const handlePayment = async () => {
-        await razorpayPaymentHandler(user);
-    }
-
     return (
         <div className="flex justify-between px-1 pb-3">
             <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}>
@@ -81,7 +77,7 @@ function Header() {
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-auto bg-black border-gray-700">
-                        <div className="flex justify-center gap-1 font-bold text-lg font-username py-1 text-white border-b-2 border-gray-700">
+                        <div className={`flex justify-center gap-1 font-bold text-lg font-username py-1 ${user?.verified && "pl-3 pr-1"} text-white border-b-2 border-gray-700`}>
                             {user?.username}
                             {user?.verified && (
                                 <img src={VerifiedTick} alt="Verified" className='w-5 h-5 mt-[2px]' />
@@ -156,10 +152,7 @@ function Header() {
                                     Pay &#8377;10 and get verified for lifetime
                                 </DialogDescription>
                                 <div className="flex justify-center gap-1 pt-3 mr-1">
-                                    <Avatar className="h-10 w-10 hover:brightness-50 bg-gray-200 cursor-pointer">
-                                        <AvatarImage src={user?.imgUrl} />
-                                        <AvatarFallback>{user?.username[0]}</AvatarFallback>
-                                    </Avatar>
+                                    <img src={user?.imgUrl} alt="Default Profile" className='w-10 rounded-full bg-gray-100'/>
                                     <div>
                                         <p className="text-lg font-semibold mt-2 ml-1 font-username">{user?.username}</p>
                                     </div>
@@ -170,7 +163,7 @@ function Header() {
                             </div>
                         </div>
                         <DialogClose>
-                            <Button type="submit" className="w-full" onClick={() => {handlePayment()}}>Pay &#8377;10</Button>
+                            <Button type="submit" className="w-full" onClick={() => { razorpayPaymentHandler(user) }}>Pay &#8377;10</Button>
                         </DialogClose>
                     </DialogContent>
                 )}

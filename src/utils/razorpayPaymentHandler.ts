@@ -1,8 +1,10 @@
+import { PAYMENT_AMOUNT } from "../constants/PAYMENT_AMOUNT";
 import { toast } from "../hooks/use-toast";
 import { createOrder, verifyPayment } from "../services/operations/PaymentAPI";
 
 interface User {
   username: string;
+  verified: boolean;
 }
 
 interface RazorpayResponse {
@@ -15,7 +17,7 @@ const razorpayPaymentHandler = async (user: User) => {
   try {
     const date = new Date();
     const orderData = {
-      amount: 1000, // Consider making this dynamic
+      amount: PAYMENT_AMOUNT.VERIFICATION*100, // Consider making this dynamic
       currency: "INR",
       receipt: `${date.toLocaleDateString()} - ${date.toLocaleTimeString()}`,
     };
@@ -30,8 +32,7 @@ const razorpayPaymentHandler = async (user: User) => {
         currency: order.currency,
         name: "ChatNow",
         description: "Payment for getting verified",
-        image:
-          "https://res.cloudinary.com/dwivoxxaz/image/upload/v1728220262/ChatNow/User%20Icons/Anime-Char10_prbkoa.jpg",
+        image: "https://res.cloudinary.com/dwivoxxaz/image/upload/v1729930924/ChatNow/Logo/aukljg1kar7jcus3nndb.jpg",
         order_id: order.id,
         handler: async (response: RazorpayResponse) => {
           const data = {
@@ -48,7 +49,7 @@ const razorpayPaymentHandler = async (user: User) => {
               duration: 3000,
             });
 
-            window.location.reload();
+            user.verified = true;
           } else {
             toast({
               variant: "destructive",
