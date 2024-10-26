@@ -178,6 +178,10 @@ function ChatView({ activeUsers }: any) {
     }, [friendId]);
 
     useEffect(() => {
+        setChat([]);
+    },[friendId]);
+
+    useEffect(() => {
         const refreshChatHandler = async () => {
             if (parseInt(refreshChat) === friendId) {
                 await fetchData();
