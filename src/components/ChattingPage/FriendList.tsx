@@ -39,7 +39,7 @@ function FriendList({ activeUsers }: any) {
     return (
         <div className="">
             <div className="flex-grow">
-                {friendList.length === 0 ? (
+                {!friendList || friendList.length === 0 ? (
                     loader ? (
                         // run the skeleton 10 time
                         Array.from({ length: 5 }).map((_, index) => (
