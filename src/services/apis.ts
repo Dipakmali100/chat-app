@@ -29,3 +29,7 @@ export const PaymentApi = {
     VERIFY_PAYMENT: `${BASE_URL}/payment/verify-payment`,
 }
 
+// Traffic Routes
+export const TrafficApi = {
+    UPDATE_TRAFFIC: `${BASE_URL}/traffic/update-traffic`,
+}

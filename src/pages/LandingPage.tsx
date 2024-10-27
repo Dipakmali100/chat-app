@@ -7,6 +7,7 @@ import TestimonialSection from "../components/LandingPage/TestimonialSection";
 import Footer from "../components/LandingPage/Footer";
 import Header from "../components/LandingPage/Header";
 import { useEffect, useState } from "react";
+import { updateTraffic } from "../services/operations/TrafficAPI";
 
 export default function LandingPage() {
   const [showButton, setShowButton] = useState(false);
@@ -29,6 +30,11 @@ export default function LandingPage() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("Updating traffic");
+    updateTraffic();
+  },[]);
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white overflow-hidden">
