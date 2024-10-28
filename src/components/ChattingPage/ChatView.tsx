@@ -30,6 +30,9 @@ import VerifiedTick from '../../assets/VerifiedTick.png';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../ui/context-menu';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { deleteMessageFromChat } from '../../utils/deleteMessageFromChat';
+import MessageDeleteTone from '../../assets/sound-effects/MessageDeleteTone.mp3';
+import MessageSentTone from '../../assets/sound-effects/MessageSentTone.mp3';
+import MessageReceivedTone from '../../assets/sound-effects/MessageReceivedTone.mp3';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl, verified } = useSelector((state: any) => state.activeUser);
@@ -44,6 +47,9 @@ function ChatView({ activeUsers }: any) {
     const dispatch = useDispatch();
     const chatEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const deleteAudioRef = useRef<HTMLAudioElement>(null);
+    const sentAudioRef = useRef<HTMLAudioElement>(null);
+    const receivedAudioRef = useRef<HTMLAudioElement>(null);
     async function fetchData() {
         setLoading(true);
         const response = await getChat(friendId);
@@ -89,6 +95,9 @@ function ChatView({ activeUsers }: any) {
         if (response.success) {
             await fetchData();
             dispatch(setRefreshFriendList(Math.random()));
+            if (sentAudioRef.current) {
+                sentAudioRef.current.play();
+            }
             socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, content: currentMessage });
         } else {
             alert(response.message);
@@ -137,7 +146,9 @@ function ChatView({ activeUsers }: any) {
     const handleDeleteMessage = async (messageId: number) => {
         const optimisticChat = await deleteMessageFromChat(chat, messageId);
         setChat(optimisticChat);
-
+        if (deleteAudioRef.current) {
+            deleteAudioRef.current.play();
+        }
         const response = await deleteMessage(messageId);
         if (response.success) {
             dispatch(setRefreshFriendList(Math.random()));
@@ -170,6 +181,11 @@ function ChatView({ activeUsers }: any) {
         const handleNewMessage = async (data: any) => {
             console.log("New Message From FriendId: ", data.senderId);
             if (Number(data.senderId) === Number(friendId)) {
+                if (data.isNewMessage) {
+                    if (receivedAudioRef.current) {
+                        receivedAudioRef.current.play();
+                    }
+                }
                 handler(); // Fetch new chat data on receiving a new message
             }
         };
@@ -187,7 +203,7 @@ function ChatView({ activeUsers }: any) {
 
         // Set up the socket listener
         socket.on("newMessage", handleNewMessage);
-        
+
         // Handle delete message event
         socket.on("deleteMessage", handleNewMessage);
 
@@ -347,7 +363,7 @@ function ChatView({ activeUsers }: any) {
                                     (message.statusForUI === "received" ? (
                                         <ContextMenu>
                                             <ContextMenuTrigger>
-                                                <div className="mb-2" key={message.id}>
+                                                <div className="mb-2 select-none" key={message.id}>
                                                     <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
                                                         <p className='text-black break-words'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
@@ -373,7 +389,7 @@ function ChatView({ activeUsers }: any) {
                                     ) : (
                                         <ContextMenu>
                                             <ContextMenuTrigger>
-                                                <div className="mb-2 text-right" key={message.id}>
+                                                <div className="mb-2 text-right select-none" key={message.id}>
                                                     <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
                                                         <p className='text-left break-words'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
@@ -449,6 +465,11 @@ function ChatView({ activeUsers }: any) {
                     </div>
                 </div>
             </form>
+
+            {/* Sound effects */}
+            <audio ref={deleteAudioRef} src={MessageDeleteTone} />
+            <audio ref={sentAudioRef} src={MessageSentTone} />
+            <audio ref={receivedAudioRef} src={MessageReceivedTone} />
         </div>
     )
 }

@@ -5,10 +5,11 @@ import Header from '../components/ChattingPage/Header';
 import SearchView from '../components/ChattingPage/SearchView';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { setRefreshChat, setRefreshFriendList } from '../redux/slice/eventSlice';
 import { Button } from '../components/ui/button';
+import MessageReceivedTone from '../assets/sound-effects/MessageReceivedTone.mp3';
 
 export default function ChattingPage() {
   const { friendId } = useSelector((state: any) => state.activeUser);
@@ -16,6 +17,7 @@ export default function ChattingPage() {
   const [isDisconnected, setIsDisconnected] = useState(false);
   const socket = useSocket();
   const dispatch = useDispatch();
+  const receivedAudioRef = useRef<HTMLAudioElement>(null);
   const { user }: any = useAuth();
   const userId = user?.userId;
 
@@ -56,7 +58,12 @@ export default function ChattingPage() {
     });
 
     // Listen for new message
-    socket.on('newMessage', () => {
+    socket.on('newMessage', (data: any) => {
+      if(data.isNewMessage && friendId === 0) {
+        if (receivedAudioRef.current) {
+          receivedAudioRef.current.play();
+        }
+      }
       dispatch(setRefreshFriendList(Math.random()));
     });
 
@@ -109,6 +116,9 @@ export default function ChattingPage() {
       <div className={`w-full md:w-2/3 py-4 md:border-l md:border-gray-700 ${friendId !== 0 ? 'block' : 'hidden md:block'}`}>
         {friendId !== 0 ? <ChatView activeUsers={activeUsers} /> : <ChatPlaceholder />}
       </div>
+
+      {/* Sound effects */}
+      <audio ref={receivedAudioRef} src={MessageReceivedTone} />
     </div>
   )
 }
