@@ -33,7 +33,8 @@ export default function Header({ variant }: { variant: string }) {
         authContext?.logout();
         navigate("/");
         toast({
-          title: "You are logged out"
+          title: "You are logged out",
+          duration: 2000,
         })
       };
 

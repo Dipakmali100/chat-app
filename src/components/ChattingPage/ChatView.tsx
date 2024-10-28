@@ -1,12 +1,12 @@
 import { Button } from '../ui/button';
-import { ArrowLeft, Check, CheckCheck, Clock3, EllipsisVertical, Send, Trash2, UserRoundX } from 'lucide-react';
+import { ArrowLeft, Check, CheckCheck, Clock3, EllipsisVertical, Files, Send, Trash2, Trash2Icon, UserRoundX } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveUser } from '../../redux/slice/activeUserSlice';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
-import { deleteChat, getChat, sendMessage } from '../../services/operations/ChatAPI';
+import { deleteChat, deleteMessage, getChat, sendMessage } from '../../services/operations/ChatAPI';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
 import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
@@ -27,6 +27,9 @@ import { disconnectUser } from '../../services/operations/ConnectionAPI';
 import ChatLoader from "../../assets/ChatLoader.svg";
 import formatMessages from '../../utils/formatMessages';
 import VerifiedTick from '../../assets/VerifiedTick.png';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../ui/context-menu';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { deleteMessageFromChat } from '../../utils/deleteMessageFromChat';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl, verified } = useSelector((state: any) => state.activeUser);
@@ -54,7 +57,7 @@ function ChatView({ activeUsers }: any) {
         if (!message) {
             return;
         }
-        if(inputRef.current) {
+        if (inputRef.current) {
             inputRef.current.focus();
         }
         const date = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000));
@@ -100,13 +103,13 @@ function ChatView({ activeUsers }: any) {
             socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId });
             toast({
                 title: "Chat Deleted Successfully",
-                duration: 3000,
+                duration: 1000,
             })
         } else {
             toast({
                 title: response.message,
                 variant: "destructive",
-                duration: 3000,
+                duration: 2000,
             })
         }
     }
@@ -120,16 +123,37 @@ function ChatView({ activeUsers }: any) {
             socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId });
             toast({
                 title: "Disconnected Successfully",
-                duration: 3000,
+                duration: 1000,
             })
         } else {
             toast({
                 title: response.message,
                 variant: "destructive",
-                duration: 3000,
+                duration: 2000,
             })
         }
     }
+
+    const handleDeleteMessage = async (messageId: number) => {
+        const optimisticChat = await deleteMessageFromChat(chat, messageId);
+        setChat(optimisticChat);
+
+        const response = await deleteMessage(messageId);
+        if (response.success) {
+            dispatch(setRefreshFriendList(Math.random()));
+            socket?.emit("deleteMessage", { senderId: user?.userId, receiverId: friendId, messageId });
+            toast({
+                title: "Message Deleted Successfully",
+                duration: 1000,
+            });
+        } else {
+            toast({
+                title: response.message,
+                variant: "destructive",
+                duration: 2000,
+            });
+        }
+    };
 
     useEffect(() => {
         if (chatEndRef.current) {
@@ -163,10 +187,14 @@ function ChatView({ activeUsers }: any) {
 
         // Set up the socket listener
         socket.on("newMessage", handleNewMessage);
+        
+        // Handle delete message event
+        socket.on("deleteMessage", handleNewMessage);
 
         // Cleanup function
         return () => {
             socket.off("newMessage", handleNewMessage);
+            socket.off("deleteMessage", handleNewMessage);
         };
     }, [friendId, username, socket]);
 
@@ -179,7 +207,7 @@ function ChatView({ activeUsers }: any) {
 
     useEffect(() => {
         setChat([]);
-    },[friendId]);
+    }, [friendId]);
 
     useEffect(() => {
         const refreshChatHandler = async () => {
@@ -317,44 +345,72 @@ function ChatView({ activeUsers }: any) {
                             {
                                 chat[date].map((message: any) => (
                                     (message.statusForUI === "received" ? (
-                                        <div className="mb-2" key={message.id}>
-                                            <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
-                                                <p className='text-black break-words'>
-                                                    {message.content.split('\n').map((item: string, index: number) => (
-                                                        <span key={index}>
-                                                            {item}
-                                                            <br />
-                                                        </span>
-                                                    ))}
-                                                </p>
-                                                <span className="text-xs text-gray-500">{message.time}</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="mb-2 text-right" key={message.id}>
-                                            <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
-                                                <p className='text-left break-words'>
-                                                    {message.content.split('\n').map((item: string, index: number) => (
-                                                        <span key={index}>
-                                                            {item}
-                                                            <br />
-                                                        </span>
-                                                    ))}
-                                                </p>
-                                                <div className='flex justify-between py-2 gap-2'>
-                                                    <p className="text-xs text-gray-500">{message.time}</p>
-                                                    {message.status === "sent" ? (
-                                                        <Check size={16} color='grey' />
-                                                    ) : message.status === "received" ? (
-                                                        <CheckCheck size={16} color='grey' />
-                                                    ) : message.status === "seen" ? (
-                                                        <CheckCheck size={16} color='white' />
-                                                    ) : (
-                                                        <Clock3 size={16} color='grey' />
-                                                    )}
+                                        <ContextMenu>
+                                            <ContextMenuTrigger>
+                                                <div className="mb-2" key={message.id}>
+                                                    <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
+                                                        <p className='text-black break-words'>
+                                                            {message.content.split('\n').map((item: string, index: number) => (
+                                                                <span key={index}>
+                                                                    {item}
+                                                                    <br />
+                                                                </span>
+                                                            ))}
+                                                        </p>
+                                                        <span className="text-xs text-gray-500">{message.time}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            </ContextMenuTrigger>
+                                            <ContextMenuContent className="w-28 bg-black border-2 border-gray-700">
+                                                <CopyToClipboard text={message.content} onCopy={() => toast({ title: 'Copied to clipboard!', duration: 1000 })}>
+                                                    <ContextMenuItem className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm'>
+                                                        <Files size={16} className='mx-1' />
+                                                        Copy
+                                                    </ContextMenuItem>
+                                                </CopyToClipboard>
+                                            </ContextMenuContent>
+                                        </ContextMenu>
+                                    ) : (
+                                        <ContextMenu>
+                                            <ContextMenuTrigger>
+                                                <div className="mb-2 text-right" key={message.id}>
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
+                                                        <p className='text-left break-words'>
+                                                            {message.content.split('\n').map((item: string, index: number) => (
+                                                                <span key={index}>
+                                                                    {item}
+                                                                    <br />
+                                                                </span>
+                                                            ))}
+                                                        </p>
+                                                        <div className='flex justify-between py-2 gap-2'>
+                                                            <p className="text-xs text-gray-500">{message.time}</p>
+                                                            {message.status === "sent" ? (
+                                                                <Check size={16} color='grey' />
+                                                            ) : message.status === "received" ? (
+                                                                <CheckCheck size={16} color='grey' />
+                                                            ) : message.status === "seen" ? (
+                                                                <CheckCheck size={16} color='white' />
+                                                            ) : (
+                                                                <Clock3 size={16} color='grey' />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ContextMenuTrigger>
+                                            <ContextMenuContent className="w-28 bg-black border-2 border-gray-700">
+                                                <CopyToClipboard text={message.content} onCopy={() => toast({ title: 'Copied to clipboard!', duration: 1000 })}>
+                                                    <ContextMenuItem className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm'>
+                                                        <Files size={16} className='mx-1' />
+                                                        Copy
+                                                    </ContextMenuItem>
+                                                </CopyToClipboard>
+                                                <ContextMenuItem className='text-red-600 text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-red-600 rounded-sm' onClick={() => handleDeleteMessage(message.id)}>
+                                                    <Trash2Icon size={16} className='mx-1' />
+                                                    Delete
+                                                </ContextMenuItem>
+                                            </ContextMenuContent>
+                                        </ContextMenu>
                                     ))
                                 ))
                             }

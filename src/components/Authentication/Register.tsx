@@ -59,20 +59,20 @@ function Register() {
                 navigate("/chat");
                 toast({
                     title: response.message,
-                    duration: 3000,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     variant: 'destructive',
                     title: response.message,
-                    duration: 3000,
+                    duration: 2000,
                 })
             }
         } else {
             toast({
                 variant: 'destructive',
                 title: response.message,
-                duration: 3000,
+                duration: 2000,
             })
         }
         setSubmitLoading(false);

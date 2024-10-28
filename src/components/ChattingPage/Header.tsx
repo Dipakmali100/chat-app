@@ -33,7 +33,8 @@ function Header() {
         authContext?.logout();
         navigate("/auth", { state: { isLogin: true } });
         toast({
-            title: "You are logged out"
+            title: "You are logged out",
+            duration: 2000
         })
     };
 
@@ -46,12 +47,14 @@ function Header() {
         if (response.success) {
             user.imgUrl = newAvatar;
             toast({
-                title: response.message
+                title: response.message,
+                duration: 1000
             })
         } else {
             toast({
                 variant: 'destructive',
-                title: response.message
+                title: response.message,
+                duration: 2000
             })
         }
     }

@@ -19,7 +19,7 @@ export const createOrder = async (order: Order) => {
 
     return response.data;
   } catch (err) {
-    toast({ title: "Something went wrong", duration: 3000 });
+    toast({ title: "Something went wrong", duration: 2000 });
     return { success: false, message: "Something went wrong" };
   }
 };
@@ -40,7 +40,7 @@ export const verifyPayment = async (data: VerifyPayment) => {
 
     return response.data;
   } catch (err) {
-    toast({ title: "Something went wrong", duration: 3000 });
+    toast({ title: "Something went wrong", duration: 2000 });
     return { success: false, message: "Something went wrong" };
   }
 };

@@ -73,7 +73,7 @@ function SearchView() {
         await connectUser(userId);
         toast({
             title: "Successfully Connected to " + username,
-            duration: 3000,
+            duration: 2000,
         })
         const response = await searchUser(debouncingSearchValue);
         setSearchResults(response.data);
