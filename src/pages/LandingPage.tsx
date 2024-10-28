@@ -34,6 +34,7 @@ export default function LandingPage() {
   useEffect(() => {
     console.log("Updating traffic");
     updateTraffic();
+    document.title = "ChatNow"
   },[]);
 
   return (

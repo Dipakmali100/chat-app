@@ -31,7 +31,25 @@ function FriendList({ activeUsers }: any) {
         console.log("Fetching friend list due to refreshFriendList change:", refreshFriendList);
         setFriendList(response.data);
         setLoader(false);
+        updatingTitle(response.data);
     }
+
+    async function updatingTitle(friendList: any) {
+        let pendingMessagesCount = 0;
+        if (friendList) {
+            friendList.map((friend: any) => {
+                if (friend.pendingMessages > 0) {
+                    pendingMessagesCount += 1;
+                }
+            })
+        }
+        if (pendingMessagesCount > 0) {
+            document.title = `(${pendingMessagesCount}) ChatNow`;
+        } else {
+            document.title = "ChatNow";
+        }
+    }
+
     useEffect(() => {
         fetchData();
     }, [refreshFriendList]);
