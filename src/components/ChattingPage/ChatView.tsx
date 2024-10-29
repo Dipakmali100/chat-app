@@ -42,6 +42,7 @@ function ChatView({ activeUsers }: any) {
     const [deleteForBoth, setDeleteForBoth] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [typingUsers, setTypingUsers] = useState<any>({});
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
@@ -178,6 +179,24 @@ function ChatView({ activeUsers }: any) {
             return;
         }
 
+        const handleTyping = (data: any) => {
+            if (data.isTyping) {
+                setTypingUsers((prev: any) => {
+                    return {
+                        ...prev,
+                        [data.senderId]: true
+                    }
+                })
+            } else {
+                setTypingUsers((prev: any) => {
+                    return {
+                        ...prev,
+                        [data.senderId]: false
+                    }
+                })
+            }
+        }
+
         const handleNewMessage = async (data: any) => {
             console.log("New Message From FriendId: ", data.senderId);
             if (Number(data.senderId) === Number(friendId)) {
@@ -207,6 +226,9 @@ function ChatView({ activeUsers }: any) {
         // Handle delete message event
         socket.on("deleteMessage", handleNewMessage);
 
+        // Handle typing event
+        socket.on("typing", handleTyping);
+
         // Cleanup function
         return () => {
             socket.off("newMessage", handleNewMessage);
@@ -221,6 +243,25 @@ function ChatView({ activeUsers }: any) {
         }
     }, [friendId]);
 
+    // Emit typing event
+    useEffect(() => {
+        if (!message || message === "") {
+            socket?.emit('typing', { senderId: user?.userId, receiverId: friendId, isTyping: false });
+            return;
+        }
+
+        socket?.emit('typing', { senderId: user?.userId, receiverId: friendId, isTyping: true });
+    }, [message]);
+
+    useEffect(() => {
+        Object.keys(typingUsers).forEach((key: any) => {
+            if (!activeUsers[key]) {
+                typingUsers[key] = false;
+            }
+        })
+    }, [activeUsers]);
+
+    // Reset chat and isTyping state when friendId changes
     useEffect(() => {
         setChat([]);
     }, [friendId]);
@@ -246,6 +287,7 @@ function ChatView({ activeUsers }: any) {
 
             // Dispatch the setActiveUser action
             dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }));
+            socket?.emit('typing', { senderId: user?.userId, receiverId: friendId, isTyping: false });
         };
 
         // Add an event listener for the popstate event
@@ -266,7 +308,10 @@ function ChatView({ activeUsers }: any) {
                             variant="ghost"
                             size="icon"
                             className="mr-2 md:hidden"
-                            onClick={() => dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "", verified: false }))}
+                            onClick={() => {
+                                dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "", verified: false }));
+                                socket?.emit('typing', { senderId: user?.userId, receiverId: friendId, isTyping: false });
+                            }}
                         >
                             <ArrowLeft className="h-6 w-6" />
                         </Button>
@@ -282,7 +327,7 @@ function ChatView({ activeUsers }: any) {
                                 <img src={VerifiedTick} alt="Verified" className='w-4 h-4 mt-1' />
                             )}
                         </div>
-                        <p className={`text-sm ${activeUsers[friendId] ? "text-green-500 font-bold" : "text-gray-400"}`}>{activeUsers[friendId] ? "Online" : "Offline"}</p>
+                        <p className={`text-sm ${typingUsers[friendId] && activeUsers[friendId] ? "text-green-500 font-bold" : activeUsers[friendId] ? "text-green-500 font-bold" : "text-gray-400"}`}>{typingUsers[friendId] && activeUsers[friendId] ? "Typing..." : activeUsers[friendId] ? "Online" : "Offline"}</p>
                     </div>
                 </div>
 
@@ -445,7 +490,7 @@ function ChatView({ activeUsers }: any) {
                         className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500 h-8 max-h-20"
                         placeholder="Type Message Here..."
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={(e) => { setMessage(e.target.value); }}
                         onKeyDown={(e) => {
                             const isTabletOrLarger = window.innerWidth > 768;
                             if (isTabletOrLarger && e.key === 'Enter') {

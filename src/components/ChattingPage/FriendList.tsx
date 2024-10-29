@@ -7,6 +7,7 @@ import { Check, CheckCheck } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
 import VerifiedTick from "../../assets/VerifiedTick.png";
+import { useSocket } from "../../context/SocketContext";
 
 type Friend = {
     senderId: number;
@@ -23,7 +24,9 @@ function FriendList({ activeUsers }: any) {
     const { refreshFriendList } = useSelector((state: any) => state.event);
     const [loader, setLoader] = useState(false);
     const [friendList, setFriendList] = useState<Friend[]>([]);
+    const [typingUsers, setTypingUsers] = useState<any>({});
     const dispatch = useDispatch();
+    const socket = useSocket();
 
     async function fetchData() {
         setLoader(true);
@@ -53,6 +56,41 @@ function FriendList({ activeUsers }: any) {
     useEffect(() => {
         fetchData();
     }, [refreshFriendList]);
+
+    useEffect(() => {
+        if (!socket) {
+            return;
+        }
+        socket.on("typing", (data: any) => {
+            if (data.isTyping) {
+                setTypingUsers((prev: any) => {
+                    return {
+                        ...prev,
+                        [data.senderId]: true
+                    }
+                })
+            } else {
+                setTypingUsers((prev: any) => {
+                    return {
+                        ...prev,
+                        [data.senderId]: false
+                    }
+                })
+            }
+        })
+
+        return () => {
+            socket.off("typing");
+        }
+    }, [socket]);
+
+    useEffect(() => {
+        Object.keys(typingUsers).forEach((key: any) => {
+            if (!activeUsers[key]) {
+                typingUsers[key] = false;
+            }
+        })
+    }, [activeUsers]);
 
     return (
         <div className="">
@@ -97,7 +135,7 @@ function FriendList({ activeUsers }: any) {
                             </div>
                             <div className="flex">
                                 <span className="pt-1">
-                                    {friend.statusForUI === "sent" && (friend.status === "sent" ? (
+                                    {typingUsers[friend.senderId] && activeUsers[friend.senderId] ? "" : friend.statusForUI === "sent" && (friend.status === "sent" ? (
                                         <Check size={16} color='grey' />
                                     ) : friend.status === "received" ? (
                                         <CheckCheck size={16} color='grey' />
@@ -105,7 +143,22 @@ function FriendList({ activeUsers }: any) {
                                         <CheckCheck size={16} color='white' />
                                     ))}
                                 </span>
-                                {friend.content === "" ? friend.chatStarted ? <i className="text-sm text-gray-400">&#x2022; Chat has been deleted</i> : <p className="text-sm font-bold text-green-400">&#x2022; New Connection</p> : <p className={`text-sm text-gray-400 ${friend.statusForUI === "sent" && "ml-1"}`}>{friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}</p>}
+                                {
+                                    typingUsers[friend.senderId] && activeUsers[friend.senderId] ? (
+                                        <p className="text-sm font-bold text-green-400">Typing...</p>
+                                    ) : friend.content === "" ? (
+                                        friend.chatStarted ? (
+                                            <i className="text-sm text-gray-400">&#x2022; Chat has been deleted</i>
+                                        ) : (
+                                            <p className="text-sm font-bold text-green-400">&#x2022; New Connection</p>
+                                        )
+                                    ) : (
+                                        <p className={`text-sm text-gray-400 ${friend.statusForUI === "sent" && "ml-1"}`}>
+                                            {friend.content.length > 20 ? `${friend.content.slice(0, 20)}...` : friend.content}
+                                        </p>
+                                    )
+                                }
+
                             </div>
                         </div>
                         <div className="flex flex-col items-end">
