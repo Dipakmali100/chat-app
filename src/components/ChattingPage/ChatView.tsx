@@ -451,7 +451,7 @@ function ChatView({ activeUsers }: any) {
                                                             ) : message.status === "received" ? (
                                                                 <CheckCheck size={16} color='grey' />
                                                             ) : message.status === "seen" ? (
-                                                                <CheckCheck size={16} strokeWidth={2.5} color="#007bab" />
+                                                                <CheckCheck size={16} strokeWidth={2.5} color="#0195F7" />
                                                             ) : (
                                                                 <Clock3 size={16} color='grey' />
                                                             )}
