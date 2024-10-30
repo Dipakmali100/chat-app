@@ -140,7 +140,7 @@ function FriendList({ activeUsers }: any) {
                                     ) : friend.status === "received" ? (
                                         <CheckCheck size={16} color='grey' />
                                     ) : (
-                                        <CheckCheck size={16} color='green' />
+                                        <CheckCheck size={16} strokeWidth={2.5} color="#007bab" />
                                     ))}
                                 </span>
                                 {
