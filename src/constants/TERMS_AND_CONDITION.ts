@@ -13,7 +13,7 @@ export const TERMS_AND_CONDITION = [
     },
     {
         "title":"Refunds/Cancellations",
-        "description":"Our platform does not process any payments at the moment. Once integrated with Razorpay, any payments made through the platform will be eligible for a refund in case of accidental transactions or service disruptions. Refunds will be processed within 5-7 working days and credited to the original payment method."
+        "description":"Payments made through the platform are eligible for a refund in cases such as accidental transactions or service disruptions. Refunds will be processed within 5-7 working days and credited to the original payment method."
     },
     {
         "title":"Liability",
