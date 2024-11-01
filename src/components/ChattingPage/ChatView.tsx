@@ -43,6 +43,7 @@ function ChatView({ activeUsers }: any) {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [typingUsers, setTypingUsers] = useState<any>({});
+    const [isNewMessage, setIsNewMessage] = useState(false);
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
@@ -89,6 +90,7 @@ function ChatView({ activeUsers }: any) {
             ...prevChat,
             Today: [...(prevChat.Today || []), onGoingMessageObject] // Ensure 'Today' is initialized as an array
         }));
+        setIsNewMessage(true);
 
         const currentMessage = message;
         setMessage("");
@@ -168,8 +170,11 @@ function ChatView({ activeUsers }: any) {
     };
 
     useEffect(() => {
-        if (chatEndRef.current) {
-            chatEndRef.current.scrollIntoView({ behavior: 'instant' });
+        if (isNewMessage) {
+            if (chatEndRef.current) {
+                chatEndRef.current.scrollIntoView({ behavior: 'instant' });
+                setIsNewMessage(false);
+            }
         }
     }, [chat]);
 
@@ -204,6 +209,7 @@ function ChatView({ activeUsers }: any) {
                     if (receivedAudioRef.current) {
                         receivedAudioRef.current.play();
                     }
+                    setIsNewMessage(true);
                 }
                 handler(); // Fetch new chat data on receiving a new message
             }
@@ -253,6 +259,7 @@ function ChatView({ activeUsers }: any) {
         socket?.emit('typing', { senderId: user?.userId, receiverId: friendId, isTyping: true });
     }, [message]);
 
+    // When user suddenly gets disconnected, then set typing to false
     useEffect(() => {
         Object.keys(typingUsers).forEach((key: any) => {
             if (!activeUsers[key]) {
@@ -263,6 +270,7 @@ function ChatView({ activeUsers }: any) {
 
     // Reset chat and isTyping state when friendId changes
     useEffect(() => {
+        // setIsNewMessage(true);
         setChat([]);
     }, [friendId]);
 
@@ -406,10 +414,10 @@ function ChatView({ activeUsers }: any) {
                             {
                                 chat[date].map((message: any) => (
                                     (message.statusForUI === "received" ? (
-                                        <ContextMenu>
+                                        <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
                                                 <div className="mb-2 select-none" key={message.id}>
-                                                    <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words">
+                                                    <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words cursor-default">
                                                         <p className='text-black break-words'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
                                                                 <span key={index}>
@@ -432,7 +440,7 @@ function ChatView({ activeUsers }: any) {
                                             </ContextMenuContent>
                                         </ContextMenu>
                                     ) : (
-                                        <ContextMenu>
+                                        <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
                                                 <div className="mb-2 text-right select-none" key={message.id}>
                                                     <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
@@ -461,7 +469,7 @@ function ChatView({ activeUsers }: any) {
                                             </ContextMenuTrigger>
                                             <ContextMenuContent className="w-28 bg-black border-2 border-gray-700">
                                                 <CopyToClipboard text={message.content} onCopy={() => toast({ title: 'Copied to clipboard!', duration: 1000 })}>
-                                                    <ContextMenuItem className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm'>
+                                                    <ContextMenuItem key={message.id} className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm'>
                                                         <Files size={16} className='mx-1' />
                                                         Copy
                                                     </ContextMenuItem>
