@@ -43,7 +43,7 @@ function ChatView({ activeUsers }: any) {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [typingUsers, setTypingUsers] = useState<any>({});
-    const [isNewMessage, setIsNewMessage] = useState(false);
+    const [isNewMessage, setIsNewMessage] = useState(true);
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
@@ -170,6 +170,7 @@ function ChatView({ activeUsers }: any) {
     };
 
     useEffect(() => {
+        console.log("Chat changed: ", isNewMessage);
         if (isNewMessage) {
             if (chatEndRef.current) {
                 chatEndRef.current.scrollIntoView({ behavior: 'instant' });
@@ -312,17 +313,14 @@ function ChatView({ activeUsers }: any) {
             <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-700 md:px-4">
                 <div className='flex'>
                     <div className="flex items-center">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="mr-2 md:hidden"
+                        <div className="p-2 mx-2 md:hidden cursor-pointer hover:rounded-full hover:bg-gray-800"
                             onClick={() => {
                                 dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "", verified: false }));
                                 socket?.emit('typing', { senderId: user?.userId, receiverId: friendId, isTyping: false });
                             }}
                         >
-                            <ArrowLeft className="h-6 w-6" />
-                        </Button>
+                            <ArrowLeft className="w-4 h-4" />
+                        </div>
                         <Avatar className="h-10 w-10 mr-3 bg-gray-200">
                             <AvatarImage src={imgUrl} />
                             <AvatarFallback>{username[0]}</AvatarFallback>
