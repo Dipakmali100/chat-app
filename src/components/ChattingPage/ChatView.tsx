@@ -43,7 +43,7 @@ function ChatView({ activeUsers }: any) {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [typingUsers, setTypingUsers] = useState<any>({});
-    const [isNewMessage, setIsNewMessage] = useState(true);
+    const [isNewMessage, setIsNewMessage] = useState(false);
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
@@ -170,11 +170,13 @@ function ChatView({ activeUsers }: any) {
     };
 
     useEffect(() => {
-        console.log("Chat changed: ", isNewMessage);
+        // Scroll to bottom when only new message arrives and friend chat get changed
         if (isNewMessage) {
             if (chatEndRef.current) {
                 chatEndRef.current.scrollIntoView({ behavior: 'instant' });
-                setIsNewMessage(false);
+                if(Object.keys(chat).length > 0) {
+                    setIsNewMessage(false);
+                }   
             }
         }
     }, [chat]);
@@ -269,10 +271,10 @@ function ChatView({ activeUsers }: any) {
         })
     }, [activeUsers]);
 
-    // Reset chat and isTyping state when friendId changes
+    // Reset chat and turning isNewMessage to true when friendId changes, So as the friend chat gets changed then chat should scroll to bottom
     useEffect(() => {
-        // setIsNewMessage(true);
         setChat([]);
+        setIsNewMessage(true);
     }, [friendId]);
 
     useEffect(() => {
