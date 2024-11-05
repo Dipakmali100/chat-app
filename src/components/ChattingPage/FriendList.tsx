@@ -8,6 +8,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Label } from "../ui/label";
 import VerifiedTick from "../../assets/VerifiedTick.png";
 import { useSocket } from "../../context/SocketContext";
+import { useAuth } from "../../context/AuthContext";
 
 type Friend = {
     senderId: number;
@@ -27,6 +28,8 @@ function FriendList({ activeUsers }: any) {
     const [typingUsers, setTypingUsers] = useState<any>({});
     const dispatch = useDispatch();
     const socket = useSocket();
+    const { user }: any = useAuth();
+    const userId = user?.userId;
 
     async function fetchData() {
         setLoader(true);
@@ -56,6 +59,12 @@ function FriendList({ activeUsers }: any) {
     useEffect(() => {
         fetchData();
     }, [refreshFriendList]);
+
+    useEffect(() => {
+        if (socket && userId) {
+          socket.emit('getAlreadyOnlineUsers', { socketId: socket.id, userId });
+        }
+      }, [friendList.length]);
 
     useEffect(() => {
         if (!socket) {

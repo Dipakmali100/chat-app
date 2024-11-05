@@ -5,7 +5,7 @@ import eventSlice from "./slice/eventSlice";
 const store = configureStore({
   reducer: {
     activeUser: activeUserSlice,
-    event: eventSlice,
+    event: eventSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

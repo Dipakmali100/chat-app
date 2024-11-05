@@ -13,8 +13,8 @@ import MessageReceivedTone from '../assets/sound-effects/MessageReceivedTone.mp3
 
 export default function ChattingPage() {
   const { friendId } = useSelector((state: any) => state.activeUser);
-  const [activeUsers, setActiveUsers] = useState<any>({});
   const [isDisconnected, setIsDisconnected] = useState(false);
+  const [activeUsers, setActiveUsers] = useState<any>({});
   const socket = useSocket();
   const dispatch = useDispatch();
   const receivedAudioRef = useRef<HTMLAudioElement>(null);
@@ -59,7 +59,8 @@ export default function ChattingPage() {
 
     // Listen for new message
     socket.on('newMessage', (data: any) => {
-      if(data.isNewMessage && friendId === 0) {
+      if (data.isNewMessage && friendId === 0) {
+        // Play received audio whenever a new message is received even if that specific chat is not open
         if (receivedAudioRef.current) {
           receivedAudioRef.current.play();
         }

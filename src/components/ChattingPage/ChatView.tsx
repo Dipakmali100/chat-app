@@ -101,7 +101,7 @@ function ChatView({ activeUsers }: any) {
             if (sentAudioRef.current) {
                 sentAudioRef.current.play();
             }
-            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, content: currentMessage });
+            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, isNewMessage: true });
         } else {
             alert(response.message);
         }
@@ -112,7 +112,7 @@ function ChatView({ activeUsers }: any) {
         if (response.success) {
             await fetchData();
             dispatch(setRefreshFriendList(Math.random()));
-            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId });
+            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, isNewMessage: false });
             toast({
                 title: "Chat Deleted Successfully",
                 duration: 1000,
@@ -132,7 +132,7 @@ function ChatView({ activeUsers }: any) {
         if (response.success) {
             dispatch(setRefreshFriendList(Math.random()));
             dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }));
-            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId });
+            socket?.emit("sendMessage", { senderId: user?.userId, receiverId: friendId, isDisconnect: true });
             toast({
                 title: "Disconnected Successfully",
                 duration: 1000,
@@ -208,6 +208,10 @@ function ChatView({ activeUsers }: any) {
         const handleNewMessage = async (data: any) => {
             console.log("New Message From FriendId: ", data.senderId);
             if (Number(data.senderId) === Number(friendId)) {
+                if(data.isDisconnect) {
+                    dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }));
+                    return;
+                }
                 if (data.isNewMessage) {
                     if (receivedAudioRef.current) {
                         receivedAudioRef.current.play();

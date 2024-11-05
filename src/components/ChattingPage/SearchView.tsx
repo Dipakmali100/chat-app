@@ -9,6 +9,8 @@ import { useDispatch } from 'react-redux';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
 import { toast } from '../../hooks/use-toast';
 import VerifiedTick from '../../assets/VerifiedTick.png';
+import { useSocket } from '../../context/SocketContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface User {
     id: number;
@@ -23,8 +25,11 @@ function SearchView() {
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const [onceSearch, setOnceSearch] = useState(false);
     const [loading, setLoading] = useState(false);
+    const socket = useSocket();
     const debouncingSearchValue = useDebouncedValue(searchTerm, 500);
     const dispatch = useDispatch();
+    const { user }: any = useAuth();
+    const userId = user?.userId;
     const ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -69,12 +74,15 @@ function SearchView() {
         setSearchTerm("");
     };
 
-    const handleConnectUser = async (userId: number, username: string) => {
-        await connectUser(userId);
+    const handleConnectUser = async (searchUserId: number, username: string) => {
+        await connectUser(searchUserId);
         toast({
             title: "Successfully Connected to " + username,
             duration: 2000,
         })
+        if (socket && userId) {
+            socket.emit("sendMessage", { senderId: userId, receiverId: searchUserId, isNewMessage: false });
+        }
         const response = await searchUser(debouncingSearchValue);
         setSearchResults(response.data);
         dispatch(setRefreshFriendList(Math.random()));
