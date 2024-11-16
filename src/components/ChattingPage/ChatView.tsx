@@ -77,7 +77,7 @@ function ChatView({ activeUsers }: any) {
             id: Date.now(),
             senderId: user?.userId,
             receiverId: friendId,
-            content: message,
+            content: message.trim(),
             status: "going",
             createdAt: Date.now(),
             statusForUI: "sent",
