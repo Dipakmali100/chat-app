@@ -67,7 +67,7 @@ export default function LandingPage() {
         <ChevronUp className="h-6 w-6 " />
       </motion.div> */}
       {showButton && (
-        <div className="fixed bottom-4 right-4 p-2 bg-primary text-white rounded-full shadow-lg z-50" onClick={scrollToTop}>
+        <div className="fixed bottom-4 right-4 p-2 bg-primary text-white rounded-full shadow-lg z-50 cursor-pointer" onClick={scrollToTop}>
           <ChevronUp className="h-6 w-6" />
         </div>
       )}
