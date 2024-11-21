@@ -1,5 +1,5 @@
 import { Button } from '../ui/button';
-import { ArrowLeft, Check, CheckCheck, Clock3, EllipsisVertical, Files, Send, Trash2, Trash2Icon, UserRoundX } from 'lucide-react';
+import { ArrowLeft, Check, CheckCheck, Clock3, EllipsisVertical, Files, ReplyAll, Send, Trash2, Trash2Icon, UserRoundX, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveUser } from '../../redux/slice/activeUserSlice';
@@ -33,6 +33,7 @@ import { deleteMessageFromChat } from '../../utils/deleteMessageFromChat';
 import MessageDeleteTone from '../../assets/sound-effects/MessageDeleteTone.mp3';
 import MessageSentTone from '../../assets/sound-effects/MessageSentTone.mp3';
 import MessageReceivedTone from '../../assets/sound-effects/MessageReceivedTone.mp3';
+import { Label } from '../ui/label';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl, verified } = useSelector((state: any) => state.activeUser);
@@ -44,14 +45,19 @@ function ChatView({ activeUsers }: any) {
     const [loading, setLoading] = useState(false);
     const [typingUsers, setTypingUsers] = useState<any>({});
     const [isNewMessage, setIsNewMessage] = useState(false);
+    const [shouldTextAreaFocus, setShouldTextAreaFocus] = useState(false);
+    const [replyMsgId, setReplyMsgId] = useState(1);
+    const [replyMsgContent, setReplyMsgContent] = useState<any>({});
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
     const chatEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const messageRefs = useRef(new Map());
     const deleteAudioRef = useRef<HTMLAudioElement>(null);
     const sentAudioRef = useRef<HTMLAudioElement>(null);
     const receivedAudioRef = useRef<HTMLAudioElement>(null);
+
     async function fetchData() {
         setLoading(true);
         const response = await getChat(friendId);
@@ -60,29 +66,33 @@ function ChatView({ activeUsers }: any) {
         setLoading(false);
         console.log("Chat got refreshed");
     }
+
     async function handleMessageSubmit(e: any) {
         e.preventDefault();
         if (!message) {
             return;
         }
-        if (inputRef.current) {
-            inputRef.current.focus();
-        }
+        setShouldTextAreaFocus(true);
         const date = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000));
         const hours = date.getUTCHours();
         const minutes = date.getUTCMinutes();
         const amOrPm = hours >= 12 ? "PM" : "AM";
         const formattedTime = `${hours % 12 || 12}:${minutes < 10 ? "0" : ""}${minutes} ${amOrPm}`;
-        const onGoingMessageObject = {
+        let onGoingMessageObject = {
             id: Date.now(),
+            isReply: replyMsgId !== 1,//
             senderId: user?.userId,
             receiverId: friendId,
+            msgType: "text",//
             content: message.trim(),
             status: "going",
             createdAt: Date.now(),
             statusForUI: "sent",
             time: formattedTime,
-            date: "Today"
+            date: "Today",
+            replyMsgType: "text",//
+            replyMsgContent: replyMsgContent.content,//
+            replyMsgSenderId: replyMsgContent.senderId,//
         };
 
         // Update chat state correctly by pushing the new message to the array
@@ -92,9 +102,16 @@ function ChatView({ activeUsers }: any) {
         }));
         setIsNewMessage(true);
 
+        // Temporariry storing message details before setting to default state
+        const currentReplyMsgId = replyMsgId;
         const currentMessage = message;
+
+        // Setting state to default, So it will not show in UI
+        setReplyMsgId(1);
+        setReplyMsgContent({});
         setMessage("");
-        const response = await sendMessage(friendId, currentMessage);
+
+        const response = await sendMessage(currentReplyMsgId !== 1, currentReplyMsgId, friendId, currentMessage);
         if (response.success) {
             await fetchData();
             dispatch(setRefreshFriendList(Math.random()));
@@ -106,6 +123,19 @@ function ChatView({ activeUsers }: any) {
             alert(response.message);
         }
     }
+
+    const focusMessage = (messageId: number) => {
+        console.log("messageId: ", messageId);
+        const messageRef = messageRefs.current.get(messageId);
+        if (messageRef) {
+            messageRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // messageRef.classList.add('focus-highlight');
+            // setTimeout(() => {
+            //     messageRef.classList.remove('focus-highlight');
+            // }, 2000); // Optional: Remove highlight after 2 seconds
+        }
+    };
+
 
     async function handleDeleteChat() {
         const response = await deleteChat(friendId);
@@ -170,13 +200,20 @@ function ChatView({ activeUsers }: any) {
     };
 
     useEffect(() => {
+        if (shouldTextAreaFocus) {
+            inputRef.current?.focus();
+            setShouldTextAreaFocus(false); // Reset to avoid redundant focusing
+        }
+    }, [shouldTextAreaFocus]);
+
+    useEffect(() => {
         // Scroll to bottom when only new message arrives and friend chat get changed
         if (isNewMessage) {
             if (chatEndRef.current) {
                 chatEndRef.current.scrollIntoView({ behavior: 'instant' });
-                if(Object.keys(chat).length > 0) {
+                if (Object.keys(chat).length > 0) {
                     setIsNewMessage(false);
-                }   
+                }
             }
         }
     }, [chat]);
@@ -208,7 +245,7 @@ function ChatView({ activeUsers }: any) {
         const handleNewMessage = async (data: any) => {
             console.log("New Message From FriendId: ", data.senderId);
             if (Number(data.senderId) === Number(friendId)) {
-                if(data.isDisconnect) {
+                if (data.isDisconnect) {
                     dispatch(setActiveUser({ friendId: 0, username: "", imgUrl: "" }));
                     return;
                 }
@@ -420,9 +457,15 @@ function ChatView({ activeUsers }: any) {
                                     (message.statusForUI === "received" ? (
                                         <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
-                                                <div className="mb-2 select-none" key={message.id}>
-                                                    <div className="inline-block bg-white rounded-lg p-2 max-w-xs overflow-hidden break-words cursor-default">
-                                                        <p className='text-black break-words'>
+                                                <div className="mb-1 select-none" key={message.id} ref={(el) => messageRefs.current.set(message.id, el)}>
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words cursor-default">
+                                                        {message.isReply && (
+                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#11FFFB] cursor-pointer' onClick={() => focusMessage(message.replyMsgSenderId)} >
+                                                                <Label className='text-[#11FFFB]'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
+                                                                <div>{message.replyMsgContent.length > 30 ? message.replyMsgContent.substring(0, 30) + "..." : message.replyMsgContent}</div>
+                                                            </div>
+                                                        )}
+                                                        <p className='text-white break-words px-1'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
                                                                 <span key={index}>
                                                                     {item}
@@ -430,11 +473,19 @@ function ChatView({ activeUsers }: any) {
                                                                 </span>
                                                             ))}
                                                         </p>
-                                                        <span className="text-xs text-gray-500">{message.time}</span>
+                                                        <div className="text-xs text-gray-500 pb-1 px-1">{message.time}</div>
                                                     </div>
                                                 </div>
                                             </ContextMenuTrigger>
                                             <ContextMenuContent className="w-28 bg-black border-2 border-gray-700">
+                                                <ContextMenuItem className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm' onClick={() => {
+                                                    setReplyMsgId(message.id); setReplyMsgContent(message); setTimeout(() => {
+                                                        setShouldTextAreaFocus(true);
+                                                    }, 0);
+                                                }}>
+                                                    <ReplyAll size={16} className='mx-1' />
+                                                    Reply
+                                                </ContextMenuItem>
                                                 <CopyToClipboard text={message.content} onCopy={() => toast({ title: 'Copied to clipboard!', duration: 1000 })}>
                                                     <ContextMenuItem className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm'>
                                                         <Files size={16} className='mx-1' />
@@ -446,9 +497,15 @@ function ChatView({ activeUsers }: any) {
                                     ) : (
                                         <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
-                                                <div className="mb-2 text-right select-none" key={message.id}>
-                                                    <div className="inline-block bg-gray-800 rounded-lg px-2 pt-2 max-w-xs overflow-hidden break-words">
-                                                        <p className='text-left break-words'>
+                                                <div className="mb-1 text-right select-none" key={message.id} ref={(el) => messageRefs.current.set(message.id, el)}>
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words">
+                                                        {message.isReply && (
+                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#0195F7] cursor-pointer' onClick={() => focusMessage(message.replyMsgSenderId)} >
+                                                                <Label className='text-[#0195F7]'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
+                                                                <div>{message.replyMsgContent.length > 30 ? message.replyMsgContent.substring(0, 30) + "..." : message.replyMsgContent}</div>
+                                                            </div>
+                                                        )}
+                                                        <p className='text-left break-words px-1'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
                                                                 <span key={index}>
                                                                     {item}
@@ -456,7 +513,7 @@ function ChatView({ activeUsers }: any) {
                                                                 </span>
                                                             ))}
                                                         </p>
-                                                        <div className='flex justify-between py-2 gap-2'>
+                                                        <div className='flex justify-between gap-2 pb-1 px-1'>
                                                             <p className="text-xs text-gray-500">{message.time}</p>
                                                             {message.status === "sent" ? (
                                                                 <Check size={16} color='grey' />
@@ -472,6 +529,14 @@ function ChatView({ activeUsers }: any) {
                                                 </div>
                                             </ContextMenuTrigger>
                                             <ContextMenuContent className="w-28 bg-black border-2 border-gray-700">
+                                                <ContextMenuItem key={message.id} className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm' onClick={() => {
+                                                    setReplyMsgId(message.id); setReplyMsgContent(message); setTimeout(() => {
+                                                        setShouldTextAreaFocus(true);
+                                                    }, 0);
+                                                }}>
+                                                    <ReplyAll size={16} className='mx-1' />
+                                                    Reply
+                                                </ContextMenuItem>
                                                 <CopyToClipboard text={message.content} onCopy={() => toast({ title: 'Copied to clipboard!', duration: 1000 })}>
                                                     <ContextMenuItem key={message.id} className='text-white text-sm cursor-pointer flex justify-left gap-1 p-1 hover:bg-white hover:text-black rounded-sm'>
                                                         <Files size={16} className='mx-1' />
@@ -496,7 +561,21 @@ function ChatView({ activeUsers }: any) {
             </div>
 
             <form onSubmit={handleMessageSubmit}>
-                <div className="flex px-2 md:px-4">
+                {replyMsgId !== 1 && (
+                    <div className='flex flex-col border-t-2 border-gray-700 px-5 py-2'>
+                        <div className='flex justify-between'>
+                            <Label>Replying to {replyMsgContent.senderId === user?.userId ? "You" : username}</Label>
+                            <X className='cursor-pointer' size={18} onClick={() => {
+                                setReplyMsgId(1); setReplyMsgContent({}); setShouldTextAreaFocus(true);
+                            }} />
+                        </div>
+                        <div className='text-[#B1B2B8] font-medium'>
+                            <Label>{replyMsgContent.content.length > 90 ? replyMsgContent.content.slice(0, 90) + "..." : replyMsgContent.content}</Label>
+                        </div>
+                    </div>
+                )}
+                <div className="relative flex px-2 md:px-4">
+
                     <Textarea
                         ref={inputRef}
                         className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500 h-8 max-h-20"

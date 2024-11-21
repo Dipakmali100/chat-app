@@ -34,9 +34,11 @@ export const getChat = async (friendId: number) => {
     }
 }
 
-export const sendMessage = async (receiverId: string, content: string) => {
+export const sendMessage = async (isReply:boolean, replyMsgId: number, receiverId: string, content: string) => {
     try{
         const response = await axios.post(SEND_MESSAGE, {
+            isReply,
+            replyMsgId,
             receiverId,
             content
         }, {
