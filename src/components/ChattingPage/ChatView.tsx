@@ -124,18 +124,18 @@ function ChatView({ activeUsers }: any) {
         }
     }
 
+    // Function to focus on a specific message
     const focusMessage = (messageId: number) => {
         console.log("messageId: ", messageId);
         const messageRef = messageRefs.current.get(messageId);
         if (messageRef) {
             messageRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // messageRef.classList.add('focus-highlight');
-            // setTimeout(() => {
-            //     messageRef.classList.remove('focus-highlight');
-            // }, 2000); // Optional: Remove highlight after 2 seconds
+            messageRef.classList.add('bg-gray-700');
+            setTimeout(() => {
+                messageRef.classList.remove('bg-gray-700');
+            }, 1500); 
         }
     };
-
 
     async function handleDeleteChat() {
         const response = await deleteChat(friendId);
@@ -457,10 +457,10 @@ function ChatView({ activeUsers }: any) {
                                     (message.statusForUI === "received" ? (
                                         <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
-                                                <div className="mb-1 select-none" key={message.id} ref={(el) => messageRefs.current.set(message.id, el)}>
-                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words cursor-default">
+                                                <div className="mb-1 select-none" key={message.id} >
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words cursor-default" ref={(el) => messageRefs.current.set(message.id, el)}>
                                                         {message.isReply && (
-                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#11FFFB] cursor-pointer' onClick={() => focusMessage(message.replyMsgSenderId)} >
+                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#11FFFB] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
                                                                 <Label className='text-[#11FFFB]'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
                                                                 <div>{message.replyMsgContent.length > 30 ? message.replyMsgContent.substring(0, 30) + "..." : message.replyMsgContent}</div>
                                                             </div>
@@ -497,10 +497,10 @@ function ChatView({ activeUsers }: any) {
                                     ) : (
                                         <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
-                                                <div className="mb-1 text-right select-none" key={message.id} ref={(el) => messageRefs.current.set(message.id, el)}>
-                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words">
+                                                <div className="mb-1 text-right select-none" key={message.id}>
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words" ref={(el) => messageRefs.current.set(message.id, el)}>
                                                         {message.isReply && (
-                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#0195F7] cursor-pointer' onClick={() => focusMessage(message.replyMsgSenderId)} >
+                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#0195F7] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
                                                                 <Label className='text-[#0195F7]'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
                                                                 <div>{message.replyMsgContent.length > 30 ? message.replyMsgContent.substring(0, 30) + "..." : message.replyMsgContent}</div>
                                                             </div>
