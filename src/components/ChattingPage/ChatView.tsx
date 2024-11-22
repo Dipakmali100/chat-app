@@ -133,7 +133,7 @@ function ChatView({ activeUsers }: any) {
             messageRef.classList.add('focus-highlight');
             setTimeout(() => {
                 messageRef.classList.remove('focus-highlight');
-            }, 1500); 
+            }, 2000); 
         }
     };
 

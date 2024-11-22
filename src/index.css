@@ -87,14 +87,22 @@
 }
 
 .focus-highlight {
-  animation: focus-glow 1.5s ease-in-out;
+  animation: focus-glow 2s ease-in-out;
 }
 
 @keyframes focus-glow {
   from {
-    background-color: rgba(31,41,55, 0.2);
+    background-color: rgb(55,65,81);
+  }
+  to {
+    background-color: rgb(30,40,55);
+  }
+}
+/* @keyframes focus-glow {
+  from {
+    background-color: rgba(54, 61, 71, 0.2);
   }
   to {
     background-color: rgba(55,65,81, 0.5);
   }
-}
+} */
