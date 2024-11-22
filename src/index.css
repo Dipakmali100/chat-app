@@ -85,3 +85,16 @@
   background-color: #ffffff; /* Color of the scrollbar thumb */
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
 }
+
+.focus-highlight {
+  animation: focus-glow 1.5s ease-in-out;
+}
+
+@keyframes focus-glow {
+  from {
+    background-color: rgba(31,41,55, 0.2);
+  }
+  to {
+    background-color: rgba(55,65,81, 0.5);
+  }
+}

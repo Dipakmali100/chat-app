@@ -130,9 +130,9 @@ function ChatView({ activeUsers }: any) {
         const messageRef = messageRefs.current.get(messageId);
         if (messageRef) {
             messageRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            messageRef.classList.add('bg-gray-600');
+            messageRef.classList.add('focus-highlight');
             setTimeout(() => {
-                messageRef.classList.remove('bg-gray-600');
+                messageRef.classList.remove('focus-highlight');
             }, 1500); 
         }
     };
@@ -449,7 +449,7 @@ function ChatView({ activeUsers }: any) {
                 ) : (
                     Object.keys(chat).map((date, index) => (
                         <div key={index}>
-                            <div className='sticky top-0 text-xs text-gray-400 flex justify-center mb-3 '>
+                            <div className='sticky top-0 text-xs text-gray-400 flex justify-center mb-3'>
                                 <p className='bg-gray-900 py-1 px-2 rounded-sm'>{date}</p>
                             </div>
                             {
