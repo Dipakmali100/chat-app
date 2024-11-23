@@ -87,7 +87,7 @@
 }
 
 .focus-highlight {
-  animation: focus-glow 2s ease-in-out;
+  animation: focus-glow 3s ease-in-out;
 }
 
 @keyframes focus-glow {

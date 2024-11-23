@@ -1,5 +1,5 @@
 import { Button } from '../ui/button';
-import { ArrowLeft, Check, CheckCheck, Clock3, EllipsisVertical, Files, ReplyAll, Send, Trash2, Trash2Icon, UserRoundX, X } from 'lucide-react';
+import { ArrowLeft, Check, CheckCheck, ChevronsDown, Clock3, EllipsisVertical, Files, ReplyAll, Send, Trash2, Trash2Icon, UserRoundX, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveUser } from '../../redux/slice/activeUserSlice';
@@ -9,6 +9,7 @@ import { useSocket } from '../../context/SocketContext';
 import { deleteChat, deleteMessage, getChat, sendMessage } from '../../services/operations/ChatAPI';
 import { setRefreshFriendList } from '../../redux/slice/eventSlice';
 import { Textarea } from '../ui/textarea';
+import { motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import {
     AlertDialog,
@@ -45,12 +46,14 @@ function ChatView({ activeUsers }: any) {
     const [loading, setLoading] = useState(false);
     const [typingUsers, setTypingUsers] = useState<any>({});
     const [isNewMessage, setIsNewMessage] = useState(false);
+    const [showGoBottomButton, setShowGoBottomButton] = useState(false);
     const [shouldTextAreaFocus, setShouldTextAreaFocus] = useState(false);
     const [replyMsgId, setReplyMsgId] = useState(1);
     const [replyMsgContent, setReplyMsgContent] = useState<any>({});
     const { user }: any = useAuth();
     const socket = useSocket();
     const dispatch = useDispatch();
+    const chatContainerRef = useRef<HTMLDivElement>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const messageRefs = useRef(new Map());
@@ -133,8 +136,13 @@ function ChatView({ activeUsers }: any) {
             messageRef.classList.add('focus-highlight');
             setTimeout(() => {
                 messageRef.classList.remove('focus-highlight');
-            }, 2000); 
+            }, 3000);
         }
+    };
+
+    // Function to handle scrolling to the bottom
+    const scrollToBottom = () => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     async function handleDeleteChat() {
@@ -198,6 +206,29 @@ function ChatView({ activeUsers }: any) {
             });
         }
     };
+
+    // Function to track scroll position
+    const handleScroll = () => {
+        const chatContainer = chatContainerRef.current;
+        console.log("Chat Container: ", chatContainer);
+        if (chatContainer) {
+            console.log("Scroll Height: ", chatContainer.scrollHeight, " Scroll Top: ", chatContainer.scrollTop, " Client Height: ", chatContainer.clientHeight);
+            const isAtBottom = chatContainer.scrollHeight - chatContainer.clientHeight - 100 <= chatContainer.scrollTop;
+            setShowGoBottomButton(!isAtBottom);
+        }
+    };
+
+    useEffect(() => {
+        const chatContainer = chatContainerRef.current;
+        if (chatContainer) {
+            chatContainer.addEventListener('scroll', handleScroll);
+        }
+        return () => {
+            if (chatContainer) {
+                chatContainer.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (shouldTextAreaFocus) {
@@ -443,7 +474,7 @@ function ChatView({ activeUsers }: any) {
                 </div>
             </div>
 
-            <div className="flex-grow overflow-auto mb-2 px-2 md:px-4">
+            <div ref={chatContainerRef} className="flex-grow overflow-auto mb-2 px-2 md:px-4">
                 {chat.length === 0 && loading ? (
                     <img src={ChatLoader} alt="Loader" className='item-center mx-auto w-6' />
                 ) : (
@@ -460,7 +491,7 @@ function ChatView({ activeUsers }: any) {
                                                 <div className="mb-1 select-none" key={message.id} >
                                                     <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words cursor-default" ref={(el) => messageRefs.current.set(message.id, el)}>
                                                         {message.isReply && (
-                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#11FFFB] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
+                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-1 mb-1 border-l-4 border-[#11FFFB] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
                                                                 <Label className='text-[#11FFFB] cursor-pointer'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
                                                                 <div>{message.replyMsgContent.length > 30 ? message.replyMsgContent.substring(0, 30) + "..." : message.replyMsgContent}</div>
                                                             </div>
@@ -500,7 +531,7 @@ function ChatView({ activeUsers }: any) {
                                                 <div className="mb-1 text-right select-none" key={message.id}>
                                                     <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words" ref={(el) => messageRefs.current.set(message.id, el)}>
                                                         {message.isReply && (
-                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-[6px] mb-1 border-l-4 border-[#0195F7] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
+                                                            <div className='bg-black text-left max-w-xs rounded-md px-2 py-1 mb-1 border-l-4 border-[#0195F7] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
                                                                 <Label className='text-[#0195F7] cursor-pointer'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
                                                                 <div>{message.replyMsgContent.length > 30 ? message.replyMsgContent.substring(0, 30) + "..." : message.replyMsgContent}</div>
                                                             </div>
@@ -554,6 +585,16 @@ function ChatView({ activeUsers }: any) {
                             }
                         </div>
                     ))
+                )}
+                {showGoBottomButton && (
+                    <motion.button
+                        onClick={scrollToBottom}
+                        className="fixed bottom-[68px] right-4 bg-gray-900 hover:bg-gray-800 p-2 rounded-full"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }}
+                    >
+                        <ChevronsDown size={16}/>
+                    </motion.button>
                 )}
 
                 {/* This div will help scroll to the bottom */}
