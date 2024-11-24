@@ -33,10 +33,10 @@ export default function Header({ variant }: { variant: string }) {
         authContext?.logout();
         navigate("/");
         toast({
-          title: "You are logged out",
-          duration: 2000,
+            title: "You are logged out",
+            duration: 2000,
         })
-      };
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -163,7 +163,7 @@ export default function Header({ variant }: { variant: string }) {
                                 </div>
                                 <SheetFooter>
                                     <SheetClose asChild>
-                                        <Button type="submit" onClick={() => { userId ? navigate("/chat") : navigate("/auth") }}>{userId ? "Logout" : "Register/Login"}</Button>
+                                        <Button type="submit" onClick={() => { userId ? handleLogout() : navigate("/auth") }}>{userId ? "Logout" : "Register/Login"}</Button>
                                     </SheetClose>
                                 </SheetFooter>
                             </SheetContent>

@@ -474,13 +474,13 @@ function ChatView({ activeUsers }: any) {
                 </div>
             </div>
 
-            <div ref={chatContainerRef} className="flex-grow overflow-auto mb-2 px-2 md:px-4">
+            <div ref={chatContainerRef} className="flex-grow overflow-auto mb-2">
                 {chat.length === 0 && loading ? (
                     <img src={ChatLoader} alt="Loader" className='item-center mx-auto w-6' />
                 ) : (
                     Object.keys(chat).map((date, index) => (
                         <div key={index}>
-                            <div className='sticky top-0 text-xs text-gray-400 flex justify-center mb-3'>
+                            <div className='sticky top-0 text-xs text-gray-400 flex justify-center my-2'>
                                 <p className='bg-gray-900 py-1 px-2 rounded-sm'>{date}</p>
                             </div>
                             {
@@ -488,8 +488,8 @@ function ChatView({ activeUsers }: any) {
                                     (message.statusForUI === "received" ? (
                                         <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
-                                                <div className="mb-1 select-none" key={message.id} >
-                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words cursor-default" ref={(el) => messageRefs.current.set(message.id, el)}>
+                                                <div className="rounded-sm px-2 md:px-4 select-none" key={message.id} ref={(el) => messageRefs.current.set(message.id, el)}>
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words cursor-default">
                                                         {message.isReply && (
                                                             <div className='bg-black text-left max-w-xs rounded-md px-2 py-1 mb-1 border-l-4 border-[#11FFFB] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
                                                                 <Label className='text-[#11FFFB] cursor-pointer'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
@@ -528,8 +528,8 @@ function ChatView({ activeUsers }: any) {
                                     ) : (
                                         <ContextMenu key={message.id}>
                                             <ContextMenuTrigger>
-                                                <div className="mb-1 text-right select-none" key={message.id}>
-                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words" ref={(el) => messageRefs.current.set(message.id, el)}>
+                                                <div className="rounded-sm px-2 md:px-4 text-right select-none" key={message.id} ref={(el) => messageRefs.current.set(message.id, el)}>
+                                                    <div className="inline-block bg-gray-800 rounded-lg px-1 pt-1 max-w-xs overflow-hidden break-words">
                                                         {message.isReply && (
                                                             <div className='bg-black text-left max-w-xs rounded-md px-2 py-1 mb-1 border-l-4 border-[#0195F7] cursor-pointer' onClick={() => focusMessage(message.replyMsgId)} >
                                                                 <Label className='text-[#0195F7] cursor-pointer'>{message.replyMsgSenderId === user?.userId ? "You" : username}</Label>
@@ -586,60 +586,62 @@ function ChatView({ activeUsers }: any) {
                         </div>
                     ))
                 )}
-                {showGoBottomButton && (
-                    <motion.button
-                        onClick={scrollToBottom}
-                        className="fixed bottom-[68px] right-4 bg-gray-900 hover:bg-gray-800 p-2 rounded-full"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }}
-                    >
-                        <ChevronsDown size={16}/>
-                    </motion.button>
-                )}
 
                 {/* This div will help scroll to the bottom */}
                 <div ref={chatEndRef} />
             </div>
 
             <form onSubmit={handleMessageSubmit}>
-                {replyMsgId !== 1 && (
-                    <div className='flex flex-col border-t-2 border-gray-700 px-5 py-2'>
-                        <div className='flex justify-between'>
-                            <Label>Replying to {replyMsgContent.senderId === user?.userId ? "You" : username}</Label>
-                            <X className='cursor-pointer' size={18} onClick={() => {
-                                setReplyMsgId(1); setReplyMsgContent({}); setShouldTextAreaFocus(true);
-                            }} />
+                <div className='relative'>
+                    {replyMsgId !== 1 && (
+                        <div className='flex flex-col border-t-2 border-gray-700 px-5 py-2'>
+                            <div className='flex justify-between'>
+                                <Label>Replying to {replyMsgContent.senderId === user?.userId ? "You" : username}</Label>
+                                <X className='cursor-pointer' size={18} onClick={() => {
+                                    setReplyMsgId(1); setReplyMsgContent({}); setShouldTextAreaFocus(true);
+                                }} />
+                            </div>
+                            <div className='text-[#B1B2B8] font-medium'>
+                                <Label>{replyMsgContent.content.length > 90 ? replyMsgContent.content.slice(0, 90) + "..." : replyMsgContent.content}</Label>
+                            </div>
                         </div>
-                        <div className='text-[#B1B2B8] font-medium'>
-                            <Label>{replyMsgContent.content.length > 90 ? replyMsgContent.content.slice(0, 90) + "..." : replyMsgContent.content}</Label>
-                        </div>
-                    </div>
-                )}
-                <div className="relative flex px-2 md:px-4">
+                    )}
+                    <div className="relative flex px-2 md:px-4">
 
-                    <Textarea
-                        ref={inputRef}
-                        className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500 h-8 max-h-20"
-                        placeholder="Type Message Here..."
-                        value={message}
-                        onChange={(e) => { setMessage(e.target.value); }}
-                        onKeyDown={(e) => {
-                            const isTabletOrLarger = window.innerWidth > 768;
-                            if (isTabletOrLarger && e.key === 'Enter') {
-                                if (e.shiftKey) {
-                                    // Allow new line
-                                    return;
-                                } else {
-                                    handleMessageSubmit(e); // Call your submit function
+                        <Textarea
+                            ref={inputRef}
+                            className="flex-grow mr-2 bg-transparent border-gray-700 text-white placeholder-gray-500 h-8 max-h-20"
+                            placeholder="Type Message Here..."
+                            value={message}
+                            onChange={(e) => { setMessage(e.target.value); }}
+                            onKeyDown={(e) => {
+                                const isTabletOrLarger = window.innerWidth > 768;
+                                if (isTabletOrLarger && e.key === 'Enter') {
+                                    if (e.shiftKey) {
+                                        // Allow new line
+                                        return;
+                                    } else {
+                                        handleMessageSubmit(e); // Call your submit function
+                                    }
                                 }
-                            }
-                        }}
-                    />
-                    <div className='flex flex-col justify-end'>
-                        <Button size="icon" type='submit' className="bg-white text-black hover:bg-gray-200">
-                            <Send className="h-4 w-4" />
-                        </Button>
+                            }}
+                        />
+                        <div className='flex flex-col justify-end'>
+                            <Button size="icon" type='submit' className="bg-white text-black hover:bg-gray-200">
+                                <Send className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
+                    {showGoBottomButton && (
+                        <motion.button
+                            onClick={scrollToBottom}
+                            className={`absolute top-[-42px] right-4 bg-gray-900 hover:bg-gray-800 p-2 rounded-full`}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }}
+                        >
+                            <ChevronsDown size={16} />
+                        </motion.button>
+                    )}
                 </div>
             </form>
 

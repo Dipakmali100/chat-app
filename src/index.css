@@ -92,17 +92,20 @@
 
 @keyframes focus-glow {
   from {
-    background-color: rgb(55,65,81);
+    background-color: rgba(55, 65, 81, 0.250);
   }
   to {
-    background-color: rgb(30,40,55);
+    background-color: black;
   }
 }
-/* @keyframes focus-glow {
-  from {
-    background-color: rgba(54, 61, 71, 0.2);
+
+@media screen and (max-width: 767px) {
+  @keyframes focus-glow {
+    from {
+      background-color: rgba(55, 65, 81, 0.400);
+    }
+    to {
+      background-color: black;
+    }
   }
-  to {
-    background-color: rgba(55,65,81, 0.5);
-  }
-} */
+}
