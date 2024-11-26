@@ -11,6 +11,7 @@ import { toast } from '../../hooks/use-toast';
 import VerifiedTick from '../../assets/VerifiedTick.png';
 import { useSocket } from '../../context/SocketContext';
 import { useAuth } from '../../context/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 interface User {
     id: number;
@@ -125,11 +126,10 @@ function SearchView() {
                             <div key={user.id}>
                                 <div className={`flex items-center justify-between py-2 ${index === 0 ? "" : "border-t-2 border-slate-700"}`}>
                                     <div className="flex items-center">
-                                        <img
-                                            src={user.imgUrl}
-                                            alt={user.username}
-                                            className="w-10 h-10 rounded-full mr-2"
-                                        />
+                                        <Avatar className="h-10 w-10 mr-3 bg-gray-200">
+                                            <AvatarImage src={user.imgUrl} />
+                                            <AvatarFallback>{user.username[0]}</AvatarFallback>
+                                        </Avatar>
                                         <div className='flex gap-1'>
                                             <p className="font-bold">{user.username}</p>
                                             {user.verified && (
