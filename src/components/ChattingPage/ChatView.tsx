@@ -35,6 +35,8 @@ import MessageDeleteTone from '../../assets/sound-effects/MessageDeleteTone.mp3'
 import MessageSentTone from '../../assets/sound-effects/MessageSentTone.mp3';
 import MessageReceivedTone from '../../assets/sound-effects/MessageReceivedTone.mp3';
 import { Label } from '../ui/label';
+import { Link } from 'react-router-dom';
+import Linkify from 'linkify-react';
 
 function ChatView({ activeUsers }: any) {
     const { friendId, username, imgUrl, verified } = useSelector((state: any) => state.activeUser);
@@ -60,6 +62,11 @@ function ChatView({ activeUsers }: any) {
     const deleteAudioRef = useRef<HTMLAudioElement>(null);
     const sentAudioRef = useRef<HTMLAudioElement>(null);
     const receivedAudioRef = useRef<HTMLAudioElement>(null);
+
+    const renderLink = ({ attributes, content }: any) => {
+        const { href, ...props } = attributes;
+        return <Link to={href} target='_blank' className='text-blue-400 hover:underline' {...props}>{content}</Link>;
+    };
 
     async function fetchData() {
         setLoading(true);
@@ -499,7 +506,7 @@ function ChatView({ activeUsers }: any) {
                                                         <p className='text-white break-words px-1'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
                                                                 <span key={index}>
-                                                                    {item}
+                                                                    <Linkify options={{render:renderLink}}>{item}</Linkify>
                                                                     <br />
                                                                 </span>
                                                             ))}
@@ -539,7 +546,7 @@ function ChatView({ activeUsers }: any) {
                                                         <p className='text-left break-words px-1'>
                                                             {message.content.split('\n').map((item: string, index: number) => (
                                                                 <span key={index}>
-                                                                    {item}
+                                                                    <Linkify options={{render:renderLink}}>{item}</Linkify>
                                                                     <br />
                                                                 </span>
                                                             ))}
