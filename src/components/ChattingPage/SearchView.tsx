@@ -128,7 +128,7 @@ function SearchView() {
                                     <div className="flex items-center">
                                         <Avatar className="h-10 w-10 mr-3 bg-gray-200">
                                             <AvatarImage src={user.imgUrl} />
-                                            <AvatarFallback>{user.username[0]}</AvatarFallback>
+                                            <AvatarFallback className="text-black font-bold">{user.username[0].toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         <div className='flex gap-1'>
                                             <p className="font-bold">{user.username}</p>

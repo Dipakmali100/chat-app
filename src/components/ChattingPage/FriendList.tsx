@@ -131,7 +131,7 @@ function FriendList({ activeUsers }: any) {
                             </div>}
                             <Avatar className="h-10 w-10 mr-3 bg-gray-200">
                                 <AvatarImage src={friend.imgUrl} />
-                                <AvatarFallback>{friend.username[0]}</AvatarFallback>
+                                <AvatarFallback className="text-black font-bold">{friend.username[0].toUpperCase()}</AvatarFallback>
                             </Avatar>
                         </div>
 

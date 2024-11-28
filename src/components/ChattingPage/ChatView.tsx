@@ -404,7 +404,7 @@ function ChatView({ activeUsers }: any) {
                         </div>
                         <Avatar className="h-10 w-10 mr-3 bg-gray-200">
                             <AvatarImage src={imgUrl} />
-                            <AvatarFallback>{username[0]}</AvatarFallback>
+                            <AvatarFallback className="text-black font-bold">{username[0].toUpperCase()}</AvatarFallback>
                         </Avatar>
                     </div>
                     <div>
