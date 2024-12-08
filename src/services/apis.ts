@@ -19,6 +19,7 @@ export const ConnectionApi = {
 export const ChatApi = {
     GET_FRIEND_LIST: `${BASE_URL}/chat/get-friend-list`,
     GET_CHAT: `${BASE_URL}/chat/get-chat`,
+    STREAM_CHAT: `${BASE_URL}/chat/stream-chat`,
     SEND_MESSAGE: `${BASE_URL}/chat/send-message`,
     DELETE_CHAT: `${BASE_URL}/chat/delete-chat`,
     DELETE_MESSAGE: `${BASE_URL}/chat/delete-message`,

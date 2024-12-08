@@ -60,6 +60,7 @@ function FriendList({ activeUsers }: any) {
         fetchData();
     }, [refreshFriendList]);
 
+    // get already online users when user connects to new friend
     useEffect(() => {
         if (socket && userId) {
           socket.emit('getAlreadyOnlineUsers', { socketId: socket.id, userId });
